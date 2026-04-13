@@ -4,8 +4,8 @@ import os
 
 def merge_all_jsonl():
     output_file = "dataset_final.jsonl"
-    # Cari semua file .jsonl di folder utama
-    jsonl_files = glob.glob("dataset_*.jsonl")
+    # Cari semua file .jsonl di folder training_data
+    jsonl_files = glob.glob("training_data/dataset_*.jsonl")
     
     if not jsonl_files:
         print("❌ Tidak ditemukan file dataset (.jsonl) untuk digabung.")
