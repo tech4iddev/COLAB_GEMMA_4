@@ -56,10 +56,10 @@ def formatting_prompts_func(examples):
     return { "text" : texts, }
 
 # 4. Load Dataset
-# Pastikan file synthetic ini sudah di-generate sebelumnya
-dataset_file = "dataset_synthetic_concrete.jsonl"
+# Pastikan file final ini sudah dibuat lewat merge_datasets.py
+dataset_file = "dataset_final.jsonl"
 if not os.path.exists(dataset_file):
-    print(f"❌ File {dataset_file} tidak ditemukan. Pastikan sudah di-generate.")
+    print(f"❌ File {dataset_file} tidak ditemukan. Jalankan merge_datasets.py dahulu.")
 else:
     dataset = load_dataset("json", data_files=dataset_file, split="train")
     dataset = dataset.map(formatting_prompts_func, batched = True,)
