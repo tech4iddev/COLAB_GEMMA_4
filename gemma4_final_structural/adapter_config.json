@@ -1,0 +1,12 @@
+{
+  "num_layers": 42,
+  "lora_parameters": {
+    "rank": 32,
+    "alpha": 64,
+    "dropout": 0.0,
+    "keys": ["up_proj", "down_proj", "o_proj", "k_proj", "v_proj", "gate_proj", "q_proj"]
+  },
+  "peft_type": "LORA",
+  "task_type": "CAUSAL_LM",
+  "base_model_name_or_path": "unsloth/gemma-4-E4B-it-unsloth-bnb-4bit"
+}

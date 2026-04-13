@@ -1,0 +1,27 @@
+# Konfigurasi Fine-tuning MLX untuk Mac Mini M4 (16GB RAM) - VERSI 0.31
+model: "mlx-community/gemma-4-e4b-4bit"
+
+# Dataset (Folder yang berisi train.jsonl dan valid.jsonl)
+data: "data"
+
+# LoRA Parameters
+num_layers: 16
+lora_parameters:
+  rank: 16
+  alpha: 32
+  scale: 2.0
+  dropout: 0.1
+
+# Training Hyperparameters
+batch_size: 1
+iters: 100
+learning_rate: 1e-5
+steps_per_report: 5
+steps_per_eval: 20
+adapter_path: "adapters"
+save_every: 100
+max_seq_length: 1024
+train: true
+
+# Memory Safety
+grad_checkpoint: true
