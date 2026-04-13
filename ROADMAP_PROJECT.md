@@ -12,16 +12,16 @@ Pada fase ini kita menyiapkan "Bahan Baku" untuk otak AI.
 4.  **Koneksi:** Sinkronisasi seluruh file ke GitHub & Google Colab.
 
 ## 📄 FASE 2: Ekstraksi & Digitalisasi (SEDANG BERJALAN)
-Mengubah dokumen PDF yang sulit dibaca menjadi teks Markdown yang bersih.
-1.  **Running `extract_colab.py`:** Berjalan di Google Colab.
-2.  **Pembersihan Data:** (Opsional) Menghapus teks yang tidak terbaca dari hasil scan.
-3.  **Merge Datasets:** Menyatukan data SNI (Teori) + Data Hitungan + Data Material menjadi satu file: `dataset_final.jsonl`.
+Mengubah dokumen PDF yang sulit dibaca menjadi teks Markdown bersih dan dataset JSONL.
+1.  **Running `extract_colab.py`:** Berjalan di Google Colab untuk mengubah PDF ➡️ Markdown.
+2.  **Running `convert_sni_to_jsonl.py`:** Mengubah hasil Markdown ➡️ `dataset_sni_theory.jsonl`.
+3.  **Merge Datasets:** Menjalankan `merge_datasets.py` untuk menyatukan semua file di folder `training_data/` menjadi `dataset_final.jsonl`.
 
 ## 🧠 FASE 3: Fine-Tuning / Training (LANGKAH BERIKUTNYA)
-Mengajarkan dataset ke Model Gemma 4 menggunakan mesin Unsloth di Colab.
+Mengajarkan dataset ke Model Gemma 2 9B menggunakan mesin Unsloth di Colab.
 1.  **Load Model:** Mengambil Base Model Gemma 2 9B (via Unsloth).
-2.  **Training Process:** Menjalankan `train_colab.py` (Lama proses: 15-45 menit tergantung jumlah data).
-3.  **Save LoRA Adapters:** Menyimpan "kecerdasan baru" AI ke folder `gemma4_lora_model`.
+2.  **Training Process:** Menjalankan `train_colab.py`.
+3.  **Save Results:** Ke folder `gemma4_lora_model_colab`.
 
 ## 🎯 FASE 4: Hasil Akhir & Implementasi
 Menguji apakah AI sudah benar-benar pintar.
