@@ -6,7 +6,7 @@ from datasets import load_dataset
 import os
 
 # 1. Konfigurasi Model
-model_name = "unsloth/gemma-4-4b-it"
+model_name = "unsloth/gemma-4-E4B-it"
 max_seq_length = 2048
 dtype = None # None untuk auto-detection
 load_in_4bit = True # Gunakan 4bit quantization
