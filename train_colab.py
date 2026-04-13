@@ -6,10 +6,10 @@ from datasets import load_dataset
 import os
 
 # 1. Konfigurasi Model
-model_name = "unsloth/gemma-2-9b-it-bnb-4bit"
+model_name = "unsloth/gemma-4-e4b-it-bnb-4bit"
 max_seq_length = 2048
 dtype = None # None untuk auto-detection
-load_in_4bit = True # Gunakan 4bit quantization untuk menghemat VRAM
+load_in_4bit = True # Gunakan 4bit quantization
 
 model, tokenizer = FastLanguageModel.from_pretrained(
     model_name = model_name,
