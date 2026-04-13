@@ -5,6 +5,14 @@ from transformers import TrainingArguments
 from datasets import load_dataset
 import os
 
+# 0. Patch untuk mendukung Gemma 4 (karena arsitektur baru)
+from transformers import AutoConfig, GemmaConfig
+try:
+    AutoConfig.register("gemma4", GemmaConfig)
+    print("✅ Berhasil mendaftarkan arsitektur gemma4 ke Transformers")
+except Exception as e:
+    print(f"ℹ️ Info: Arsitektur gemma4 mungkin sudah terdaftar atau gagal patch: {e}")
+
 # 1. Konfigurasi Model
 model_name = "unsloth/gemma-4-E4B-it"
 max_seq_length = 2048
