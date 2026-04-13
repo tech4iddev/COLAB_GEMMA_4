@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "Pedoman Analisis Harga Satuan Pekerjaan (AHSP) PUPR 2022",
+    "region": "Standard Indonesia",
+    "description": "Koefisien kebutuhan bahan untuk pekerjaan sipil"
+  },
+  "ahsp_beton": {
+    "K-175 (fc 14.5 MPa)": {
+      "semen": {"qty": 326, "unit": "kg"},
+      "pasir_beton": {"qty": 0.54, "unit": "m3"},
+      "kerikil": {"qty": 0.76, "unit": "m3"},
+      "air": {"qty": 215, "unit": "liter"}
+    },
+    "K-250 (fc 20.7 MPa)": {
+      "semen": {"qty": 384, "unit": "kg"},
+      "pasir_beton": {"qty": 0.49, "unit": "m3"},
+      "kerikil": {"qty": 0.72, "unit": "m3"},
+      "air": {"qty": 215, "unit": "liter"}
+    },
+    "K-300 (fc 24.9 MPa)": {
+      "semen": {"qty": 413, "unit": "kg"},
+      "pasir_beton": {"qty": 0.48, "unit": "m3"},
+      "kerikil": {"qty": 0.70, "unit": "m3"},
+      "air": {"qty": 215, "unit": "liter"}
+    }
+  },
+  "ahsp_pembesian": {
+    "10 kg Besi Tulangan": {
+      "besi_beton": {"qty": 10.5, "unit": "kg"},
+      "kawat_beton": {"qty": 0.15, "unit": "kg"}
+    }
+  },
+  "ahsp_bekisting": {
+    "1 m2 Bekisting Balok": {
+      "kayu_terentang": {"qty": 0.04, "unit": "m3"},
+      "paku": {"qty": 0.40, "unit": "kg"},
+      "minyak_bekisting": {"qty": 0.20, "unit": "liter"}
+    }
+  }
+}
