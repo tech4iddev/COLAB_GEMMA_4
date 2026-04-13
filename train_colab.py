@@ -93,7 +93,14 @@ else:
     print("🚀 Memulai Training di Google Colab...")
     trainer_stats = trainer.train()
     
-    # 7. Simpan Hasil
+    # 7. Simpan Adapter LoRA (Versi Ringan)
     model.save_pretrained("gemma4_lora_model_colab")
     tokenizer.save_pretrained("gemma4_lora_model_colab")
-    print("✅ Berhasil! Model disimpan di folder 'gemma4_lora_model_colab'")
+    print("✅ LoRA Adapter disimpan!")
+
+    # 8. EXPORT KE GGUF (PENTING untuk Mac Mini M4)
+    # Ini akan menggabungkan model dan adapter, lalu mengubahnya ke format GGUF 4-bit (Ringan untuk 16GB RAM)
+    print("🚀 Mengonversi model ke format GGUF untuk Mac Mini M4...")
+    model.save_pretrained_gguf("gemma4_final_gguf", tokenizer, quantization_method = "q4_k_m")
+    print("✨ BERHASIL! File GGUF siap di folder 'gemma4_final_gguf'.")
+    print("Materi ini bisa langsung Anda download ke Mac Mini dan dijalankan!")
