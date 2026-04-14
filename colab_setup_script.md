@@ -40,9 +40,9 @@ Login ke Hugging Face sangat wajib dilakukan jika Anda ingin menggunakan model b
 
 Pastikan Anda sudah mendapatkan **Write Access Token** dari menu *Settings > Access Tokens* di akun Hugging Face Anda.
 
-**Menggunakan CLI (Langsung memasukkan token):**
+**Menggunakan CLI Baru (Langsung memasukkan token):**
 ```bash
-!huggingface-cli login --token "MASUKKAN_TOKEN_HF_ANDA_DISINI" --add-to-git-credential
+!hf auth login --token "MASUKKAN_TOKEN_HF_ANDA_DISINI"
 ```
 
 **Atau Menggunakan Widget Login (Interaktif):**
