@@ -46,15 +46,26 @@ def extract_all_pdfs():
         tqdm.write(f"\n📂 Memproses: {filename}")
         
         try:
+            # Sisipkan Environment Variable untuk membungkam spam log TensorFlow & CUDA
+            env_vars = os.environ.copy()
+            env_vars["TF_CPP_MIN_LOG_LEVEL"] = "3" 
+            env_vars["PYTHONWARNINGS"] = "ignore"
+
             # Menggunakan subprocess.Popen agar log tiap file terlihat/live streaming
             cmd = f"{MARKER_BIN} \"{pdf_path}\" --output_dir \"{current_output_dir}\""
-            process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+            process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, env=env_vars)
             
             # Print output di tiap proses file
             for line in process.stdout:
                 line_text = line.strip()
-                if line_text:
-                    print(f"   > {line_text}")
+                if not line_text:
+                    continue
+                # FILTERING: Sembunyikan library warnings yang tidak penting
+                spam_keywords = ["tensorflow", "cuda", "computation_placer", "W0000", "E0000", "oneDNN", "AVX2"]
+                if any(spam in line_text for spam in spam_keywords):
+                    continue
+                    
+                print(f"   > {line_text}")
 
             process.wait()
 
