@@ -55,7 +55,7 @@ def extract_all_pdfs():
                     tqdm.write(f"   -> ⚠️ Gagal simpan ke GDrive: {ex_drive}")
 
             else:
-                tqdm.write(f"❌ Gagal mengekstrak: {filename}\nDetail eror: {process.stderr.strip()[:200]}")
+                tqdm.write(f"❌ Gagal mengekstrak: {filename}\nDetail eror:\n{process.stderr.strip()}")
 
         except Exception as e:
             tqdm.write(f"❌ Terjadi kesalahan pada {filename}: {e}")
