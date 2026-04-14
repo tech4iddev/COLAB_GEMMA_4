@@ -33,7 +33,7 @@ Install semua library Python yang dibutuhkan. Pastikan di dalam folder tersebut 
 !pip install -U -r requirements.txt
 ```
 > **Catatan Tambahan:** Kadang kala ketika training model seperti Gemma, kita butuh spesifik versi terbaru dari library Hugging Face. Jika belum ada di *requirements*, tambahkan command berikut:
-> `!pip install huggingface_hub "transformers<=4.38.2" peft accelerate bitsandbytes trl datasets`
+> `!pip install huggingface_hub "transformers<=4.38.2" peft accelerate bitsandbytes trl datasets google-generativeai`
 
 ## 4. Login Hugging Face Hub
 Login ke Hugging Face sangat wajib dilakukan jika Anda ingin menggunakan model base dari Hugging Face (seperti Gemma) karena model tersebut memerlukan akses (Gated Model), serta untuk mengunggah model hasil fine-tuning nantinya.
@@ -69,13 +69,16 @@ Sebelum memulai training, sangat penting untuk memeriksa apakah sesi Colab Anda 
 ---
 
 ## 7. Eksekusi Script Utama
-Setelah persiapan selesai, Anda bisa melanjutkan ke proses utama yaitu generate dataset dan training sesuai nama script Python yang ada pada project Anda.
+Setelah persiapan selesai, Anda bisa melanjutkan ke proses utama yaitu generate dataset dan training.
 
-**Contoh:**
+**Contoh Urutan:**
 ```bash
-# 1. Menjalankan script untuk generate dataset
-!python generate_dataset.py
+# 1. Menjalankan script ekstraksi PDF (jika belum)
+!python extract_colab.py
 
-# 2. Menjalankan script untuk training model
+# 2. Menjalankan script QA Generator cerdas (Gemini API) untuk bikin Dataset Pelatihan
+!python generate_qa_dataset.py
+
+# 3. Menjalankan script untuk training model (setelah dataset siap)
 !python train.py
 ```
