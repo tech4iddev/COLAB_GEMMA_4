@@ -33,6 +33,16 @@ def extract_all_pdfs():
             os.makedirs(current_output_dir)
 
         filename = os.path.basename(pdf_path)
+        base_filename = os.path.splitext(filename)[0]
+        
+        # Mengecek apakah file sudah pernah diekstrak (marker versi lama atau baru)
+        md_path_1 = os.path.join(current_output_dir, base_filename, f"{base_filename}.md")
+        md_path_2 = os.path.join(current_output_dir, f"{base_filename}.md")
+        
+        if os.path.exists(md_path_1) or os.path.exists(md_path_2):
+            tqdm.write(f"\n⏭️ Melewati: {filename} (Sudah ter-ekstrak)")
+            continue
+            
         tqdm.write(f"\n📂 Memproses: {filename}")
         
         try:
