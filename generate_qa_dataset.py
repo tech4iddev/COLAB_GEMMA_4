@@ -62,6 +62,14 @@ def generate_qa_pairs_from_text(text_chunk, filename):
         data = json.loads(response_text)
         return data
     except Exception as e:
+        error_msg = str(e).lower()
+        # Mendeteksi jika saldo habis (billing issues)
+        if "insufficient_quota" in error_msg or "billing" in error_msg or "exceeded your current quota" in error_msg:
+            print(f"\n❌ [BERHENTI] API Key Ditolak! Saldo OpenAI Anda telah habis atau kartu kredit tidak valid.")
+            print(f"Buka: https://platform.openai.com/account/billing/overview")
+            import sys
+            sys.exit(1)
+            
         print(f"\n⚠️ Terjadi kesalahan parsing JSON atau Request OpenAI API: {e}")
         return []
 
