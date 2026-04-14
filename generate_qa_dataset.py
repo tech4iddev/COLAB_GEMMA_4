@@ -3,22 +3,21 @@ import glob
 import json
 import time
 from tqdm import tqdm
-import google.generativeai as genai
+from openai import OpenAI
 
 # ==========================================
-# KONFIGURASI API GEMINI & PATH
+# KONFIGURASI API OPENAI & PATH
 # ==========================================
-# Gunakan API Key Gemini Anda secara gratis dari Google AI Studio (aistudio.google.com)
-API_KEY = "MASUKKAN_API_KEY_GEMINI_ANDA_DISINI"
+# Gunakan API Key OpenAI Anda
+API_KEY = "MASUKKAN_API_KEY_OPENAI_ANDA_DISINI"
 
 # Jalur baca hasil ekstraksi PDF Anda
 INPUT_DIR = "/content/COLAB_GEMMA_4/sni_markdown"
 # Jalur output file JSONL kualitas tinggi
 OUTPUT_FILE = "/content/COLAB_GEMMA_4/training_data/dataset_sni_qa_cot.jsonl"
 
-genai.configure(api_key=API_KEY)
-# Model Flash sangat murah/gratis dan super cepat untuk ekstraksi teks massal
-model = genai.GenerativeModel('gemini-1.5-flash-latest')
+client = OpenAI(api_key=API_KEY)
+MODEL_NAME = 'gpt-4o-mini'
 
 def generate_qa_pairs_from_text(text_chunk, filename):
     prompt = f"""
@@ -44,8 +43,15 @@ def generate_qa_pairs_from_text(text_chunk, filename):
     """
     
     try:
-        response = model.generate_content(prompt)
-        response_text = response.text.strip()
+        response = client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=[
+                {"role": "system", "content": "You are a helpful structural engineering AI assistant that generates valid JSON outputs."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7
+        )
+        response_text = response.choices[0].message.content.strip()
         
         # Pembersihan backticks Markdown jika AI masih membandel me-return markdown block
         if response_text.startswith("```json"):
@@ -56,7 +62,7 @@ def generate_qa_pairs_from_text(text_chunk, filename):
         data = json.loads(response_text)
         return data
     except Exception as e:
-        print(f"\n⚠️ Terjadi kesalahan parsing JSON atau Limit API: {e}")
+        print(f"\n⚠️ Terjadi kesalahan parsing JSON atau Request OpenAI API: {e}")
         return []
 
 def main():
@@ -76,7 +82,7 @@ def main():
     os.makedirs(os.path.dirname(OUTPUT_FILE.replace("/content/COLAB_GEMMA_4/", "")), exist_ok=True)
     os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
     
-    print(f"🚀 Memulai Ekstraksi Dataset Cerdas lewat Gemini API pada {len(md_files)} file SNI...")
+    print(f"🚀 Memulai Ekstraksi Dataset Cerdas lewat OpenAI API pada {len(md_files)} file SNI...")
     
     # Buka output sebagai a (append) untuk berjaga-jaga jika terputus
     out_path = OUTPUT_FILE if os.path.exists("/content") else OUTPUT_FILE.replace("/content/COLAB_GEMMA_4/", "")
@@ -105,7 +111,7 @@ def main():
                     if len(chunk.strip()) < 300:
                         continue # Abaikan sisa teks yang terlalu pendek agar tidak jadi error no-context
                     
-                    # Memanggil Gemini API
+                    # Memanggil OpenAI API
                     qa_data = generate_qa_pairs_from_text(chunk, filename)
                     
                     if qa_data and isinstance(qa_data, list):
@@ -119,8 +125,8 @@ def main():
                                 f_gdrive.write(line_str)
                                 f_gdrive.flush() # Tercatat aman di GDrive saat itu juga
                     
-                    # Jeda 4 detik untuk mencegah error "Rate Limit / 15 Permintaan per menit" dari akun Gemini tier gratis
-                    time.sleep(4)
+                    # Jeda minimal 1 detik untuk menghindari Rate Limit ringan (sesuaikan dengan tipe tier OpenAI Anda)
+                    time.sleep(1)
         finally:
             if f_gdrive:
                 f_gdrive.close()
