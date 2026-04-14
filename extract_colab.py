@@ -1,6 +1,7 @@
 import subprocess
 import os
 import glob
+import shutil
 from tqdm import tqdm
 # Konfigurasi Path Khusus Google Colab
 PROJECT_DIR = "/content/COLAB_GEMMA_4"
@@ -41,6 +42,18 @@ def extract_all_pdfs():
 
             if process.returncode == 0:
                 tqdm.write(f"✅ Selesai mengekstrak: {filename}")
+                
+                # Otomatis backup ke GDrive secara bertahap setelah tiap file
+                try:
+                    if os.path.exists("/content/drive/MyDrive"):
+                        gdrive_dest = os.path.join("/content/drive/MyDrive/COLAB_GEMMA_4/sni_markdown", material_folder)
+                        os.makedirs(gdrive_dest, exist_ok=True)
+                        # Gunakan dirs_exist_ok=True untuk merge dan overwrite yang sudah ada
+                        shutil.copytree(current_output_dir, gdrive_dest, dirs_exist_ok=True)
+                        tqdm.write("   -> 💾 Tersimpan otomatis ke Google Drive.")
+                except Exception as ex_drive:
+                    tqdm.write(f"   -> ⚠️ Gagal simpan ke GDrive: {ex_drive}")
+
             else:
                 tqdm.write(f"❌ Gagal mengekstrak: {filename}\nDetail eror: {process.stderr.strip()[:200]}")
 
