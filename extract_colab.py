@@ -1,7 +1,7 @@
 import subprocess
 import os
 import glob
-
+from tqdm import tqdm
 # Konfigurasi Path Khusus Google Colab
 PROJECT_DIR = "/content/COLAB_GEMMA_4"
 DATASETS_DIR = os.path.join(PROJECT_DIR, "SNI Struktur")
@@ -22,7 +22,7 @@ def extract_all_pdfs():
 
     print(f"🚀 Memulai ekstraksi massal di Google Colab...")
 
-    for pdf_path in pdf_files:
+    for pdf_path in tqdm(pdf_files, desc="Progres Ekstraksi", unit="file"):
         # Tentukan folder output berdasarkan nama folder material
         rel_path = os.path.relpath(pdf_path, DATASETS_DIR)
         material_folder = os.path.dirname(rel_path)
@@ -32,32 +32,23 @@ def extract_all_pdfs():
             os.makedirs(current_output_dir)
 
         filename = os.path.basename(pdf_path)
-        print(f"\n📂 Memproses Material: {material_folder}")
-        print(f"📄 File: {filename}")
+        tqdm.write(f"\n📂 Memproses: {filename}")
         
         try:
-            # Menggunakan Popen untuk streaming output real-time di notebook Colab
-            process = subprocess.Popen([
+            # Menggunakan subprocess.run dengan capture_output agar tidak membanjiri log
+            process = subprocess.run([
                 MARKER_BIN, 
                 pdf_path, 
                 "--output_dir", current_output_dir
-            ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-
-            # Menampilkan log progress secara real-time
-            for line in process.stdout:
-                line_text = line.strip()
-                if line_text:
-                    print(f"  > {line_text}")
-
-            process.wait()
+            ], capture_output=True, text=True)
 
             if process.returncode == 0:
-                print(f"✅ Selesai mengekstrak: {filename}")
+                tqdm.write(f"✅ Selesai mengekstrak: {filename}")
             else:
-                print(f"❌ Gagal mengekstrak: {filename}")
+                tqdm.write(f"❌ Gagal mengekstrak: {filename}\nDetail eror: {process.stderr.strip()[:200]}")
 
         except Exception as e:
-            print(f"❌ Terjadi kesalahan pada {filename}: {e}")
+            tqdm.write(f"❌ Terjadi kesalahan pada {filename}: {e}")
 
     print("\n✨ Seluruh proses ekstraksi SNI di Colab selesai!")
 
