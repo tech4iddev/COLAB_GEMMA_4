@@ -46,9 +46,17 @@ def extract_all_pdfs():
         tqdm.write(f"\n📂 Memproses: {filename}")
         
         try:
-            # Menggunakan subprocess.run dengan shell=True agar path cli lebih mudah ditemukan
+            # Menggunakan subprocess.Popen agar log tiap file terlihat/live streaming
             cmd = f"{MARKER_BIN} \"{pdf_path}\" --output_dir \"{current_output_dir}\""
-            process = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+            process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+            
+            # Print output di tiap proses file
+            for line in process.stdout:
+                line_text = line.strip()
+                if line_text:
+                    print(f"   > {line_text}")
+
+            process.wait()
 
             if process.returncode == 0:
                 tqdm.write(f"✅ Selesai mengekstrak: {filename}")
@@ -65,7 +73,7 @@ def extract_all_pdfs():
                     tqdm.write(f"   -> ⚠️ Gagal simpan ke GDrive: {ex_drive}")
 
             else:
-                tqdm.write(f"❌ Gagal mengekstrak: {filename}\nDetail eror:\n{process.stderr.strip()}")
+                tqdm.write(f"❌ Gagal mengekstrak: {filename} (Detail dapat dilihat di log atas)")
 
         except Exception as e:
             tqdm.write(f"❌ Terjadi kesalahan pada {filename}: {e}")
