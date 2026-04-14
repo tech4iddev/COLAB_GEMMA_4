@@ -107,13 +107,12 @@ def main():
                 chunk_size = 4000
                 chunks = [content[i:i+chunk_size] for i in range(0, len(content), chunk_size)]
                 
-                tqdm.write(f"\n📂 Membedah dokumen: {filename} (Dipecah menjadi {len(chunks)} potongan teks)")
+                tqdm.write(f"\n📂 Membedah dokumen: {filename}")
                 
-                for index, chunk in enumerate(chunks):
+                # Gunakan nested tqdm (baris tunggal berkedip) alih-alih menge-print ribuan teks
+                for index, chunk in enumerate(tqdm(chunks, desc="Meminta API ChatGPT", leave=False)):
                     if len(chunk.strip()) < 300:
                         continue # Abaikan sisa teks yang terlalu pendek agar tidak jadi error no-context
-                    
-                    tqdm.write(f"   -> Meminta AI meracik Tanya-Jawab & Studi Kasus (Bagian {index+1}/{len(chunks)})...")
                     # Memanggil OpenAI API
                     qa_data = generate_qa_pairs_from_text(chunk, filename)
                     
