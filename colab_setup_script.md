@@ -1,0 +1,81 @@
+# Persiapan Training di Google Colab (Folder: COLAB_GEMMA_4)
+
+Berikut adalah urutan proses run/script yang perlu Anda jalankan di cell Google Colab secara berurutan sebelum memulai proses training atau generate dataset.
+
+## 1. Mount Google Drive (Opsional tapi disarankan)
+Langkah ini sangat berguna agar dataset, hasil generate, dan model hasil training otomatis tersimpan ke Drive Anda dan tidak hilang saat runtime Colab terputus atau direstart.
+
+```python
+from google.colab import drive
+drive.mount('/content/drive')
+```
+
+## 2. Clone atau Pull Repository Git (COLAB_GEMMA_4)
+Jika Anda bekerja langsung di storage sementara Colab, jalankan `git clone`. Jika bekerja di dalam Google Drive, Anda bisa masuk ke direktori tersebut dan jalankan `git pull` untuk mendapatkan pembaruan terbaru.
+
+**Jika Clone Pertama Kali:**
+```bash
+!git clone <URL_REPOSITORY_ANDA> /content/COLAB_GEMMA_4
+%cd /content/COLAB_GEMMA_4
+```
+
+**Jika Folder Sudah Ada (Update Code dengan Git Pull):**
+```bash
+%cd /content/COLAB_GEMMA_4
+!git pull origin main
+```
+*(Sesuaikan path folder jika Anda menaruhnya di dalam Google Drive, misal: `%cd /content/drive/MyDrive/COLAB_GEMMA_4`)*
+
+## 3. Install Dependencies (Requirements)
+Install semua library Python yang dibutuhkan. Pastikan di dalam folder tersebut terdapat file `requirements.txt`.
+
+```bash
+!pip install -U -r requirements.txt
+```
+> **Catatan Tambahan:** Kadang kala ketika training model seperti Gemma, kita butuh spesifik versi terbaru dari library Hugging Face. Jika belum ada di *requirements*, tambahkan command berikut:
+> `!pip install -U transformers peft accelerate bitsandbytes trl datasets`
+
+## 4. Login Hugging Face Hub
+Login ke Hugging Face sangat wajib dilakukan jika Anda ingin menggunakan model base dari Hugging Face (seperti Gemma) karena model tersebut memerlukan akses (Gated Model), serta untuk mengunggah model hasil fine-tuning nantinya.
+
+Pastikan Anda sudah mendapatkan **Write Access Token** dari menu *Settings > Access Tokens* di akun Hugging Face Anda.
+
+**Menggunakan CLI (Langsung memasukkan token):**
+```bash
+!huggingface-cli login --token "MASUKKAN_TOKEN_HF_ANDA_DISINI" --add-to-git-credential
+```
+
+**Atau Menggunakan Widget Login (Interaktif):**
+```python
+from huggingface_hub import notebook_login
+notebook_login()
+```
+
+## 5. Login Weights & Biases (W&B) - *Opsional*
+Jika Anda menggunakan Weights & Biases (`wandb`) untuk tracking metrik training (loss, learning rate, dll), lakukan login.
+
+```bash
+!pip install wandb
+!wandb login "MASUKKAN_TOKEN_WANDB_ANDA_DISINI"
+```
+
+## 6. Verifikasi Penggunaan GPU
+Sebelum memulai training, sangat penting untuk memeriksa apakah sesi Colab Anda sudah mendapatkan alokasi GPU dari Google.
+
+```bash
+!nvidia-smi
+```
+
+---
+
+## 7. Eksekusi Script Utama
+Setelah persiapan selesai, Anda bisa melanjutkan ke proses utama yaitu generate dataset dan training sesuai nama script Python yang ada pada project Anda.
+
+**Contoh:**
+```bash
+# 1. Menjalankan script untuk generate dataset
+!python generate_dataset.py
+
+# 2. Menjalankan script untuk training model
+!python train.py
+```
