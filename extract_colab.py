@@ -35,12 +35,9 @@ def extract_all_pdfs():
         tqdm.write(f"\n📂 Memproses: {filename}")
         
         try:
-            # Menggunakan subprocess.run dengan capture_output agar tidak membanjiri log
-            process = subprocess.run([
-                MARKER_BIN, 
-                pdf_path, 
-                "--output_dir", current_output_dir
-            ], capture_output=True, text=True)
+            # Menggunakan subprocess.run dengan shell=True agar path cli lebih mudah ditemukan
+            cmd = f"{MARKER_BIN} \"{pdf_path}\" --output_dir \"{current_output_dir}\""
+            process = subprocess.run(cmd, shell=True, capture_output=True, text=True)
 
             if process.returncode == 0:
                 tqdm.write(f"✅ Selesai mengekstrak: {filename}")
