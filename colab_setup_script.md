@@ -33,7 +33,7 @@ Install semua library Python yang dibutuhkan. Pastikan di dalam folder tersebut 
 !pip install -U -r requirements.txt
 ```
 > **Catatan Tambahan:** Kadang kala ketika training model seperti Gemma, kita butuh spesifik versi terbaru dari library Hugging Face. Jika belum ada di *requirements*, tambahkan command berikut:
-> `!pip install -U huggingface_hub transformers peft accelerate bitsandbytes trl datasets`
+> `!pip install huggingface_hub "transformers<=4.38.2" peft accelerate bitsandbytes trl datasets`
 
 ## 4. Login Hugging Face Hub
 Login ke Hugging Face sangat wajib dilakukan jika Anda ingin menggunakan model base dari Hugging Face (seperti Gemma) karena model tersebut memerlukan akses (Gated Model), serta untuk mengunggah model hasil fine-tuning nantinya.
