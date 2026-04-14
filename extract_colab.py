@@ -4,7 +4,7 @@ import glob
 
 # Konfigurasi Path Khusus Google Colab
 PROJECT_DIR = "/content/COLAB_GEMMA_4"
-DATASETS_DIR = os.path.join(PROJECT_DIR, "datasets_sni")
+DATASETS_DIR = os.path.join(PROJECT_DIR, "SNI Struktur")
 OUTPUT_DIR = os.path.join(PROJECT_DIR, "sni_markdown")
 # Di Google Colab, perintah marker_single langsung tersedia setelah pip install marker-pdf
 MARKER_BIN = "marker_single"
