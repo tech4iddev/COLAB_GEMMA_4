@@ -76,7 +76,25 @@ dataset_file = "/content/COLAB_GEMMA_4/training_data/dataset_sni_qa_cot.jsonl"
 if not os.path.exists(dataset_file):
     print(f"❌ File {dataset_file} tidak ditemukan. Jalankan extract_colab.py dan generate_qa_dataset.py dahulu.")
 else:
-    dataset = load_dataset("json", data_files=dataset_file, split="train")
+    # Membaca JSONL secara manual untuk menghindari error Pandas 'Trailing data' dari HF load_dataset
+    import json
+    from datasets import Dataset
+    
+    data_list = []
+    malformed_count = 0
+    with open(dataset_file, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                try:
+                    data_list.append(json.loads(line))
+                except Exception:
+                    malformed_count += 1
+                    
+    if malformed_count > 0:
+        print(f"⚠️ Melewati {malformed_count} baris JSON yang corrupt akibat auto-save terputus.")
+        
+    dataset = Dataset.from_list(data_list)
     dataset = dataset.map(formatting_prompts_func, batched = True,)
 
     # 5. Deteksi Google Drive untuk Auto-Save Checkpoints
