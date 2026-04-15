@@ -93,8 +93,36 @@ else:
                     
     if malformed_count > 0:
         print(f"⚠️ Melewati {malformed_count} baris JSON yang corrupt akibat auto-save terputus.")
+    
+    # --- Sanitasi Data: Pastikan semua value adalah string, bukan dict/list ---
+    required_keys = {"instruction", "input", "output"}
+    clean_list = []
+    skipped_count = 0
+    for item in data_list:
+        if not isinstance(item, dict) or not required_keys.issubset(item.keys()):
+            skipped_count += 1
+            continue
         
-    dataset = Dataset.from_list(data_list)
+        # Paksa semua value menjadi string. Jika ada dict/list, konversi ke JSON string.
+        clean_item = {}
+        valid = True
+        for key in required_keys:
+            val = item[key]
+            if isinstance(val, str):
+                clean_item[key] = val
+            elif isinstance(val, (dict, list)):
+                clean_item[key] = json.dumps(val, ensure_ascii=False)
+            elif val is None:
+                clean_item[key] = ""
+            else:
+                clean_item[key] = str(val)
+        clean_list.append(clean_item)
+    
+    if skipped_count > 0:
+        print(f"⚠️ Melewati {skipped_count} entri yang tidak memiliki key instruction/input/output.")
+    print(f"✅ Dataset bersih: {len(clean_list)} entri siap diproses.")
+    
+    dataset = Dataset.from_list(clean_list)
     dataset = dataset.map(formatting_prompts_func, batched = True,)
 
     # 5. Deteksi Google Drive untuk Auto-Save Checkpoints
