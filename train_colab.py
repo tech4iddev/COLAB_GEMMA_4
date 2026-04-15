@@ -34,6 +34,8 @@ model = FastLanguageModel.get_peft_model(
 )
 
 # 3. Prompt Template
+# Karena dataset QA kita sering memiliki "input" yang kosong, 
+# kita buat 2 jenis prompt: yang pakai input tambahan dan yang tidak.
 alpaca_prompt = """Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
 
 ### Instruction:
@@ -45,21 +47,33 @@ alpaca_prompt = """Below is an instruction that describes a task, paired with an
 ### Response:
 {}"""
 
+alpaca_prompt_no_input = """Below is an instruction that describes a task. Write a response that appropriately completes the request.
+
+### Instruction:
+{}
+
+### Response:
+{}"""
+
 def formatting_prompts_func(examples):
     instructions = examples["instruction"]
     inputs       = examples["input"]
     outputs      = examples["output"]
     texts = []
-    for instruction, input, output in zip(instructions, inputs, outputs):
-        text = alpaca_prompt.format(instruction, input, output) + tokenizer.eos_token
+    for instruction, input_text, output in zip(instructions, inputs, outputs):
+        # Jika kolom input kosong, jangan cetak tag "### Input:" agar Gemma tidak keliru
+        if input_text.strip() == "":
+            text = alpaca_prompt_no_input.format(instruction, output) + tokenizer.eos_token
+        else:
+            text = alpaca_prompt.format(instruction, input_text, output) + tokenizer.eos_token
         texts.append(text)
     return { "text" : texts, }
 
 # 4. Load Dataset
-# Pastikan file final ini sudah dibuat lewat merge_datasets.py
-dataset_file = "dataset_final.jsonl"
+# Mengarahkan langsung ke hasil dari script generate_qa_dataset.py
+dataset_file = "/content/COLAB_GEMMA_4/training_data/dataset_sni_qa_cot.jsonl"
 if not os.path.exists(dataset_file):
-    print(f"❌ File {dataset_file} tidak ditemukan. Jalankan merge_datasets.py dahulu.")
+    print(f"❌ File {dataset_file} tidak ditemukan. Jalankan extract_colab.py dan generate_qa_dataset.py dahulu.")
 else:
     dataset = load_dataset("json", data_files=dataset_file, split="train")
     dataset = dataset.map(formatting_prompts_func, batched = True,)
