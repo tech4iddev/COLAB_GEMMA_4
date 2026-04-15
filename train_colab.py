@@ -1,7 +1,6 @@
 from unsloth import FastLanguageModel
 import torch
-from trl import SFTTrainer
-from transformers import TrainingArguments
+from trl import SFTTrainer, SFTConfig
 from datasets import load_dataset
 import os
 import shutil
@@ -134,15 +133,15 @@ else:
         os.makedirs(gdrive_base, exist_ok=True)
         print(f"📁 Auto-Save Google Drive Aktif! Checkpoints akan lari ke: {checkpoint_dir}")
 
-    # 6. Trainer
+    # 6. Trainer (Kompatibel dengan trl v0.12+ API)
     trainer = SFTTrainer(
         model = model,
-        tokenizer = tokenizer,
+        processing_class = tokenizer,
         train_dataset = dataset,
-        dataset_text_field = "text",
-        max_seq_length = max_seq_length,
-        dataset_num_proc = 2,
-        args = TrainingArguments(
+        args = SFTConfig(
+            dataset_text_field = "text",
+            max_seq_length = max_seq_length,
+            dataset_num_proc = 2,
             per_device_train_batch_size = 4, # Ditingkatkan dari 2 -> 4 karena 24GB VRAM sangat lega
             gradient_accumulation_steps = 2, # Disesuaikan proporsional dengan batch size
             warmup_steps = 5,
