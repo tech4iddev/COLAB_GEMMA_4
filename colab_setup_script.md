@@ -32,7 +32,7 @@ Install semua library Python yang dibutuhkan. Pastikan di dalam folder tersebut 
 ```bash
 !pip install "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
 !pip install --no-deps "xformers<0.0.27" peft accelerate bitsandbytes openai tqdm
-!pip install --upgrade trl
+!pip install "trl>=0.18.2,<=0.24.0,!=0.19.0" "datasets>=3.4.1,<4.4.0"
 ```
 > **Catatan Tambahan:** Unsloth adalah framework akselerasi khusus yang wajib di-install dengan metode repositori Git di atas agar langsung cocok dengan dukungan model Gemma di mesin Colab/GPU L4.
 
