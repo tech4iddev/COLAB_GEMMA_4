@@ -30,10 +30,10 @@ Jika Anda bekerja langsung di storage sementara Colab, jalankan `git clone`. Jik
 Install semua library Python yang dibutuhkan. Pastikan di dalam folder tersebut terdapat file `requirements.txt`.
 
 ```bash
-!pip install -U -r requirements.txt
+!pip install "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
+!pip install --no-deps "xformers<0.0.27" "trl<0.9.0" peft accelerate bitsandbytes openai tqdm
 ```
-> **Catatan Tambahan:** Kadang kala ketika training model seperti Gemma, kita butuh spesifik versi terbaru dari library Hugging Face. Jika belum ada di *requirements*, tambahkan command berikut:
-> `!pip install huggingface_hub "transformers<=4.38.2" peft accelerate bitsandbytes trl datasets openai`
+> **Catatan Tambahan:** Unsloth adalah framework akselerasi khusus yang wajib di-install dengan metode repositori Git di atas agar langsung cocok dengan dukungan model Gemma di mesin Colab/GPU L4.
 
 ## 4. Login Hugging Face Hub
 Login ke Hugging Face sangat wajib dilakukan jika Anda ingin menggunakan model base dari Hugging Face (seperti Gemma) karena model tersebut memerlukan akses (Gated Model), serta untuk mengunggah model hasil fine-tuning nantinya.
@@ -79,6 +79,6 @@ Setelah persiapan selesai, Anda bisa melanjutkan ke proses utama yaitu generate 
 # 2. Menjalankan script QA Generator cerdas (OpenAI API) untuk bikin Dataset Pelatihan
 !python generate_qa_dataset.py
 
-# 3. Menjalankan script untuk training model (setelah dataset siap)
-!python train.py
+# 3. Menjalankan script untuk training model menggunakan Unsloth (setelah dataset siap)
+!python train_colab.py
 ```
