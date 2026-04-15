@@ -6,10 +6,10 @@ from datasets import load_dataset
 import os
 import shutil
 
-# 1. Konfigurasi Model
+# 1. Konfigurasi Model (Dioptimasi untuk GPU L4 - 24GB VRAM)
 model_name = "unsloth/gemma-2-9b-it-bnb-4bit"
-max_seq_length = 2048
-dtype = None # None untuk auto-detection
+max_seq_length = 4096 # L4 sanggup memegang context window hingga 4096-8192 token
+dtype = None # None untuk auto-detection (Pasti otomatis pakai Bfloat16 di L4)
 load_in_4bit = True # Gunakan 4bit quantization
 
 model, tokenizer = FastLanguageModel.from_pretrained(
@@ -97,13 +97,16 @@ else:
         max_seq_length = max_seq_length,
         dataset_num_proc = 2,
         args = TrainingArguments(
-            per_device_train_batch_size = 2,
-            gradient_accumulation_steps = 4,
+            per_device_train_batch_size = 4, # Ditingkatkan dari 2 -> 4 karena 24GB VRAM sangat lega
+            gradient_accumulation_steps = 2, # Disesuaikan proporsional dengan batch size
             warmup_steps = 5,
             max_steps = 60, # Ganti sesuai kebutuhan
             learning_rate = 2e-4,
+            
+            # L4 mendukung Bfloat16 secara hardware! Ini akan meningkatkan kecepatan training secara drastis
             fp16 = not torch.cuda.is_bf16_supported(),
             bf16 = torch.cuda.is_bf16_supported(),
+            
             logging_steps = 1,
             optim = "adamw_8bit",
             weight_decay = 0.01,
@@ -116,7 +119,10 @@ else:
     )
 
     # 7. Jalankan Training
-    print("🚀 Memulai Training di Google Colab...")
+    print("\n🚀 Memulai Training di Google Colab...")
+    if torch.cuda.get_device_name(0).startswith("NVIDIA L4"):
+        print("⚡ WUSSSH! Tipe GPU L4 24GB terdeteksi. Mode Ultra Cepat (Bfloat16 + High Batch) diaktifkan!")
+        
     trainer_stats = trainer.train()
     
     # 8. Simpan Adapter LoRA (Versi Ringan)
