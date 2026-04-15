@@ -134,35 +134,51 @@ else:
         os.makedirs(gdrive_base, exist_ok=True)
         print(f"📁 Auto-Save Google Drive Aktif! Checkpoints akan lari ke: {checkpoint_dir}")
 
-    # 6. Trainer (Kompatibel dengan Unsloth + trl yang terinstal di Colab)
-    trainer = SFTTrainer(
+    # 6. Trainer (Auto-detect kompatibilitas Unsloth + trl)
+    training_args = TrainingArguments(
+        per_device_train_batch_size = 4, # Ditingkatkan dari 2 -> 4 karena 24GB VRAM sangat lega
+        gradient_accumulation_steps = 2, # Disesuaikan proporsional dengan batch size
+        warmup_steps = 5,
+        max_steps = 60, # Ganti sesuai kebutuhan
+        learning_rate = 2e-4,
+        
+        # L4 mendukung Bfloat16 secara hardware! Ini akan meningkatkan kecepatan training secara drastis
+        fp16 = not torch.cuda.is_bf16_supported(),
+        bf16 = torch.cuda.is_bf16_supported(),
+        
+        logging_steps = 1,
+        optim = "adamw_8bit",
+        weight_decay = 0.01,
+        lr_scheduler_type = "linear",
+        seed = 3407,
+        output_dir = checkpoint_dir,
+        save_strategy = "steps",
+        save_steps = 20, # Menyimpan status (checkpoint) tiap 20 langkah
+    )
+    
+    sft_kwargs = dict(
         model = model,
-        processing_class = tokenizer,
         train_dataset = dataset,
         dataset_text_field = "text",
         max_seq_length = max_seq_length,
         dataset_num_proc = 2,
-        args = TrainingArguments(
-            per_device_train_batch_size = 4, # Ditingkatkan dari 2 -> 4 karena 24GB VRAM sangat lega
-            gradient_accumulation_steps = 2, # Disesuaikan proporsional dengan batch size
-            warmup_steps = 5,
-            max_steps = 60, # Ganti sesuai kebutuhan
-            learning_rate = 2e-4,
-            
-            # L4 mendukung Bfloat16 secara hardware! Ini akan meningkatkan kecepatan training secara drastis
-            fp16 = not torch.cuda.is_bf16_supported(),
-            bf16 = torch.cuda.is_bf16_supported(),
-            
-            logging_steps = 1,
-            optim = "adamw_8bit",
-            weight_decay = 0.01,
-            lr_scheduler_type = "linear",
-            seed = 3407,
-            output_dir = checkpoint_dir,
-            save_strategy = "steps",
-            save_steps = 20, # Menyimpan status (checkpoint) tiap 20 langkah
-        ),
+        args = training_args,
     )
+    
+    # Coba berbagai cara passing tokenizer (Unsloth sering berubah API antar versi)
+    trainer = None
+    for token_key in ["processing_class", "tokenizer"]:
+        try:
+            trainer = SFTTrainer(**{**sft_kwargs, token_key: tokenizer})
+            print(f"✅ SFTTrainer berhasil dibuat dengan parameter '{token_key}'")
+            break
+        except TypeError:
+            continue
+    
+    if trainer is None:
+        # Fallback: Unsloth mungkin mengambil tokenizer dari model secara internal
+        trainer = SFTTrainer(**sft_kwargs)
+        print("✅ SFTTrainer berhasil dibuat tanpa tokenizer (Unsloth internal)")
 
     # 7. Jalankan Training
     print("\n🚀 Memulai Training di Google Colab...")
