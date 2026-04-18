@@ -4,6 +4,8 @@ import math
 import hashlib
 import os
 
+print("\n[DEBUG] File: generate_dataset_all_sni.py | Update: 2026-04-18 23:35")
+
 seen = set()
 
 # =========================

@@ -2,6 +2,8 @@
 Script Training Gemma 2 9B - Optimized for Google Colab L4 GPU
 Lokasi: model_18_april/train_colab_L4.py
 """
+import os
+print("\n[DEBUG] File: train_colab_L4.py | Update: 2026-04-18 23:35")
 
 try:
     from unsloth import FastLanguageModel

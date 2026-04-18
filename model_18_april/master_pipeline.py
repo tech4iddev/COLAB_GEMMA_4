@@ -2,6 +2,8 @@ import subprocess
 import json
 import os
 
+print("\n[DEBUG] File: master_pipeline.py | Update: 2026-04-18 23:35")
+
 def run_script(script_name):
     print(f"🚀 Menjalankan {script_name}...")
     try:

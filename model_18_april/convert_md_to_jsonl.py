@@ -2,6 +2,8 @@ import json
 import glob
 import os
 
+print("\n[DEBUG] File: convert_md_to_jsonl.py | Update: 2026-04-18 23:35")
+
 def convert_md_to_jsonl(input_dir="./sni_markdown", output_file="datasets/dataset_theory.jsonl"):
     """
     Mengonversi file Markdown hasil ekstraksi PDF menjadi format JSONL untuk training.

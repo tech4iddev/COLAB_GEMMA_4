@@ -1,6 +1,8 @@
 import json
 import os
 
+print("\n[DEBUG] File: merge_datasets.py | Update: 2026-04-18 23:35")
+
 def merge_jsonl(files, output_file):
     final_data = []
     print("📢 Memulai proses penggabungan dataset...")
