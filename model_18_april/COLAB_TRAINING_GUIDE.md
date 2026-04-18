@@ -12,10 +12,24 @@ Pilih Runtime **L4 GPU** di menu `Runtime > Change runtime type`. Kemudian jalan
 from google.colab import drive
 drive.mount('/content/drive')
 
-# 2. Clone Repository
-# Ganti URL_REPO dengan URL repository GitHub Anda
-!git clone https://github.com/tech4iddev/COLAB_GEMMA_4.git /content/structural_ai
+# 2. Clone atau Update Repository
+Jika Anda baru pertama kali, gunakan **Clone**. Jika sudah ada folder lama, gunakan **Update (Pull)** agar mendapatkan script terbaru.
+
+```python
+import os
+
+# 1. Clone jika belum ada
+if not os.path.exists("/content/structural_ai"):
+    !git clone https://github.com/tech4iddev/COLAB_GEMMA_4.git /content/structural_ai
+    print("✅ Repository berhasil di-clone.")
+else:
+    # 2. Pull jika sudah ada untuk mendapatkan update terbaru
+    %cd /content/structural_ai
+    !git pull origin main
+    print("✅ Repository berhasil di-update (Pull).")
+
 %cd /content/structural_ai/model_18_april
+```
 
 # 3. Install Dependencies
 !pip install "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
