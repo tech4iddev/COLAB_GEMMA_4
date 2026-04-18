@@ -18,7 +18,7 @@ drive.mount('/content/drive')
 %cd /content/structural_ai/model_18_april
 
 # 3. Install Dependencies
-!pip install --no-deps unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git
+!pip install --no-deps "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
 !pip install --no-deps xformers trl peft accelerate bitsandbytes
 ```
 
