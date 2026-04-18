@@ -12,8 +12,9 @@ try:
 except ImportError:
     print("📦 Menginstall dependencies (Unsloth)...")
     import os
-    os.system('pip install --no-deps "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"')
-    os.system("pip install --no-deps xformers trl peft accelerate bitsandbytes")
+    os.system('pip install "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"')
+    os.system('pip install unsloth_zoo')
+    os.system('pip install --no-deps xformers trl peft accelerate bitsandbytes')
     from unsloth import FastLanguageModel
     import torch
     from trl import SFTTrainer
