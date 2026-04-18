@@ -61,8 +61,21 @@ Jalankan script training. Perhatikan bahwa script ini secara otomatis akan menyi
 
 ---
 
-## 4. Lokasi Hasil Training
-Setelah selesai, hasil model dan log training dapat Anda temukan di Google Drive pada folder:
+## 4. Konversi ke GGUF (Untuk Mac M4)
+Jika Anda ingin menggunakan model ini di Laptop Mac (M4) menggunakan Ollama atau LM Studio, jalankan script konversi berikut:
+
+```python
+# Membuat file GGUF (Q4_K_M)
+!python export_to_gguf.py
+```
+
+Setelah selesai, file `.gguf` akan muncul di Google Drive Anda pada folder:
+`My Drive / Structural_AI_Project / GGUF_MODELS /`
+
+---
+
+## 5. Lokasi Hasil Training Raw
+Hasil model mentah (16-bit) dan log training dapat ditemukan di:
 `My Drive / Structural_AI_Project / gemma2-9b-structural-18april`
 
 ---
