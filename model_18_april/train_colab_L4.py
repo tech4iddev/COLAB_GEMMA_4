@@ -3,7 +3,7 @@ Script Training Gemma 2 9B - Optimized for Google Colab L4 GPU
 Lokasi: model_18_april/train_colab_L4.py
 """
 import os
-print("\n[DEBUG] File: train_colab_L4.py | Update: 2026-04-18 23:37 (OOM Fix)")
+print("\n[DEBUG] File: train_colab_L4.py | Update: 2026-04-18 23:50 (OOM Safe Mode)")
 
 try:
     from unsloth import FastLanguageModel
@@ -24,32 +24,32 @@ except ImportError:
     from datasets import load_dataset
 
 def train_on_colab():
-    # 1. Konfigurasi Model
-    max_seq_length = 4096  # L4 GPU memiliki VRAM cukup untuk context panjang
-    dtype = None           # Auto detect (akan menggunakan bfloat16 di L4)
-    load_in_4bit = True    # 4-bit quantization tetap direkomendasikan untuk efisiensi
+    # 1. Konfigurasi Dasar
+    max_seq_length = 2048  # Safe context for L4
+    load_in_4bit = True
 
+    # 2. Inisialisasi Model & Tokenizer
+    print("📦 Loading model Gemma 2 9B (4-bit)...")
     model, tokenizer = FastLanguageModel.from_pretrained(
         model_name = "unsloth/gemma-2-9b-it-bnb-4bit",
         max_seq_length = max_seq_length,
-        dtype = dtype,
         load_in_4bit = load_in_4bit,
     )
 
-    # 2. Konfigurasi LoRA
+    # 3. Konfigurasi LoRA (Optimized for Structural Engineering)
     model = FastLanguageModel.get_peft_model(
         model,
-        r = 16, 
+        r = 32,
         target_modules = ["q_proj", "k_proj", "v_proj", "o_proj",
-                          "gate_proj", "up_proj", "down_proj",],
-        lora_alpha = 16,
+                         "gate_proj", "up_proj", "down_proj",],
+        lora_alpha = 32,
         lora_dropout = 0,
         bias = "none",
         use_gradient_checkpointing = "unsloth",
         random_state = 3407,
     )
 
-    # 3. Format Prompt (Gemma Style)
+    # 4. Format Prompt (Gemma Style)
     prompt_style = """<start_of_turn>user
 {}
 {}<end_of_turn>
@@ -66,28 +66,25 @@ def train_on_colab():
             texts.append(text)
         return { "text" : texts, }
 
-    # 4. Load Dataset
+    # 5. Load & Format Dataset
+    print("📂 Loading dataset...")
     dataset_path = "datasets/dataset_final_18_april.jsonl"
     if not os.path.exists(dataset_path):
-        print(f"❌ File {dataset_path} tidak ditemukan. Pastikan sudah upload ke Colab.")
+        print(f"❌ Dataset tidak ditemukan di: {dataset_path}")
         return
 
     dataset = load_dataset("json", data_files=dataset_path, split="train")
     dataset = dataset.map(formatting_prompts_func, batched = True,)
 
-    # 5. Konfigurasi Training (Optimized for L4 + GDrive Sync)
-    # Tentukan Path di Google Drive
+    # 6. Konfigurasi Training (SAFE MODE - Mencegah CUDA OOM)
     drive_base_path = "/content/drive/MyDrive/Structural_AI_Project"
     output_dir = os.path.join(drive_base_path, "outputs")
     final_model_path = os.path.join(drive_base_path, "gemma2-9b-structural-18april")
 
     if not os.path.exists(drive_base_path):
-        try:
-            os.makedirs(drive_base_path)
-            print(f"📁 Created base directory on Drive: {drive_base_path}")
-        except:
-            print("⚠️ Gagal membuat folder di Drive. Pastikan Drive sudah di-mount!")
+        os.makedirs(drive_base_path, exist_ok=True)
 
+    print("🚀 Menyiapkan Trainer (Safe Mode)...")
     trainer = SFTTrainer(
         model = model,
         tokenizer = tokenizer,
@@ -97,58 +94,53 @@ def train_on_colab():
         dataset_num_proc = 2,
         packing = True, 
         args = TrainingArguments(
-            per_device_train_batch_size = 2, # Diturunkan dari 4 ke 2 untuk menghemat VRAM
-            gradient_accumulation_steps = 8, # Dinaikkan dari 4 ke 8 (Total global batch tetap 16)
+            per_device_train_batch_size = 1,  # Safe batch size
+            gradient_accumulation_steps = 16, # Global Batch = 16
             warmup_steps = 10,
             max_steps = 120, 
             learning_rate = 2e-4,
             fp16 = not torch.cuda.is_bf16_supported(),
             bf16 = torch.cuda.is_bf16_supported(), 
             logging_steps = 1,
-            optim = "adamw_8bit",
+            optim = "paged_adamw_8bit",      # Memory efficient optimizer
             weight_decay = 0.01,
             lr_scheduler_type = "cosine",
             seed = 3407,
-            output_dir = output_dir, # Langsung ke Drive
-            save_total_limit = 2,    # Simpan 2 checkpoint terakhir saja di Drive
-            save_steps = 30,          # Simpan checkpoint setiap 30 step
+            output_dir = output_dir, 
+            save_total_limit = 2,
+            save_steps = 30,
         ),
     )
 
-    # 6. Jalankan Training
-    print(f"🚀 Memulai Training di L4 GPU... (Syncing to Drive: {output_dir})")
+    # 7. Jalankan Training
+    print(f"🔥 Memulai Training (Syncing to: {output_dir})...")
     trainer.train()
 
-    # 7. Simpan Model Akhir (Penting: Simpan Merged 16bit Terlebih Dahulu)
-    # Tentukan Path di Google Drive
-    gguf_drive_path = os.path.join(drive_base_path, "GGUF_MODELS")
-    if not os.path.exists(gguf_drive_path):
-        os.makedirs(gguf_drive_path)
-
-    print(f"📦 Menyimpan model merged 16-bit ke: {final_model_path}")
+    # 8. Simpan Model Akhir Merged
+    print(f"📦 Menyimpan model merged ke Drive: {final_model_path}")
     model.save_pretrained_merged(final_model_path, tokenizer, save_method = "merged_16bit",)
 
-    # 8. Konversi Otomatis ke GGUF (Optimized for Mac M4)
-    print("\n🚀 Memulai Konversi Otomatis ke GGUF (Q4_K_M)...")
-    gguf_filename = "gemma2-9b-structural-18april-Q4_K_M.gguf"
-    
+    # 9. Konversi Otomatis ke GGUF Q4_K_M (Untuk Mac M4)
+    print("\n🛠️ Memulai Konversi GGUF (Q4_K_M)...")
+    gguf_drive_path = os.path.join(drive_base_path, "GGUF_MODELS")
+    if not os.path.exists(gguf_drive_path):
+        os.makedirs(gguf_drive_path, exist_ok=True)
+
     model.save_pretrained_gguf(
         "structural_ai_model", 
         tokenizer, 
         quantization_method = "q4_k_m"
     )
 
-    # 9. Pindahkan file GGUF ke Drive
+    # Pindahkan GGUF ke Drive
     import shutil
     for file in os.listdir("."):
         if file.endswith(".gguf"):
-            shutil.move(file, os.path.join(gguf_drive_path, gguf_filename))
-            print(f"✨ ALL DONE! Model GGUF Anda siap di Drive: {gguf_drive_path}/{gguf_filename}")
+            shutil.move(file, os.path.join(gguf_drive_path, "gemma2-9b-structural-18april-Q4_K_M.gguf"))
+            print(f"✅ SEMUA SELESAI! GGUF siap di: {gguf_drive_path}")
             break
 
 if __name__ == "__main__":
-    import os
-    # Optimasi untuk mencegah fragmentasi memori (Mengatasi CUDA OOM)
+    # Cegah fragmentasi memori
     os.environ["PYTORCH_ALLOC_CONF"] = "expandable_segments:True"
-    
     train_on_colab()
