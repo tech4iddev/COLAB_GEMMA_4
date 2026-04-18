@@ -51,32 +51,23 @@ Setelah dijalankan, file final akan berada di `datasets/dataset_final_18_april.j
 
 ---
 
-## 3. Proses Training (Sinkronisasi Real-time ke Drive)
-Jalankan script training. Perhatikan bahwa script ini secara otomatis akan menyimpan checkpoint setiap 30 step langsung ke Google Drive Anda untuk mencegah kehilangan data jika koneksi terputus.
+## 3. Proses Training & Export GGUF Otomatis
+Jalankan script training berikut. Script ini sudah saya rancang untuk melakukan **seluruh proses** secara berurutan:
+1.  **Training**: Fins-tuning Gemma 2 9B.
+2.  **Saving**: Menyimpan model ke Google Drive.
+3.  **GGUF Export**: Mengonversi model ke format GGUF (Q4_K_M) untuk Mac M4.
 
 ```python
-# Memulai proses training (Simpan otomatis ke MyDrive/Structural_AI_Project)
+# Jalankan All-in-One Training & Export Pipeline
 !python train_colab_L4.py
 ```
 
 ---
 
-## 4. Konversi ke GGUF (Untuk Mac M4)
-Jika Anda ingin menggunakan model ini di Laptop Mac (M4) menggunakan Ollama atau LM Studio, jalankan script konversi berikut:
-
-```python
-# Membuat file GGUF (Q4_K_M)
-!python export_to_gguf.py
-```
-
-Setelah selesai, file `.gguf` akan muncul di Google Drive Anda pada folder:
-`My Drive / Structural_AI_Project / GGUF_MODELS /`
-
----
-
-## 5. Lokasi Hasil Training Raw
-Hasil model mentah (16-bit) dan log training dapat ditemukan di:
-`My Drive / Structural_AI_Project / gemma2-9b-structural-18april`
+## 4. Lokasi Hasil di Google Drive
+Setelah script selesai (All Done), Anda dapat mengambil hasilnya di:
+*   **GGUF (Untuk Mac)**: `My Drive / Structural_AI_Project / GGUF_MODELS /`
+*   **Raw Model (16-bit)**: `My Drive / Structural_AI_Project / gemma2-9b-structural-18april`
 
 ---
 ## Tips Penting:

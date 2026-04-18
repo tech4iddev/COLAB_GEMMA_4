@@ -117,9 +117,32 @@ def train_on_colab():
     print(f"🚀 Memulai Training di L4 GPU... (Syncing to Drive: {output_dir})")
     trainer.train()
 
-    # 7. Simpan Model Akhir Langsung ke Drive
+    # 7. Simpan Model Akhir (Penting: Simpan Merged 16bit Terlebih Dahulu)
+    # Tentukan Path di Google Drive
+    gguf_drive_path = os.path.join(drive_base_path, "GGUF_MODELS")
+    if not os.path.exists(gguf_drive_path):
+        os.makedirs(gguf_drive_path)
+
+    print(f"📦 Menyimpan model merged 16-bit ke: {final_model_path}")
     model.save_pretrained_merged(final_model_path, tokenizer, save_method = "merged_16bit",)
-    print(f"✨ Selesai! Model permanen tersimpan di Drive: {final_model_path}")
+
+    # 8. Konversi Otomatis ke GGUF (Optimized for Mac M4)
+    print("\n🚀 Memulai Konversi Otomatis ke GGUF (Q4_K_M)...")
+    gguf_filename = "gemma2-9b-structural-18april-Q4_K_M.gguf"
+    
+    model.save_pretrained_gguf(
+        "structural_ai_model", 
+        tokenizer, 
+        quantization_method = "q4_k_m"
+    )
+
+    # 9. Pindahkan file GGUF ke Drive
+    import shutil
+    for file in os.listdir("."):
+        if file.endswith(".gguf"):
+            shutil.move(file, os.path.join(gguf_drive_path, gguf_filename))
+            print(f"✨ ALL DONE! Model GGUF Anda siap di Drive: {gguf_drive_path}/{gguf_filename}")
+            break
 
 if __name__ == "__main__":
     import os
