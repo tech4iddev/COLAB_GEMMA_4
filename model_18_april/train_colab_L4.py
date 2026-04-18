@@ -73,7 +73,19 @@ def train_on_colab():
     dataset = load_dataset("json", data_files=dataset_path, split="train")
     dataset = dataset.map(formatting_prompts_func, batched = True,)
 
-    # 5. Konfigurasi Training (Optimized for L4)
+    # 5. Konfigurasi Training (Optimized for L4 + GDrive Sync)
+    # Tentukan Path di Google Drive
+    drive_base_path = "/content/drive/MyDrive/Structural_AI_Project"
+    output_dir = os.path.join(drive_base_path, "outputs")
+    final_model_path = os.path.join(drive_base_path, "gemma2-9b-structural-18april")
+
+    if not os.path.exists(drive_base_path):
+        try:
+            os.makedirs(drive_base_path)
+            print(f"📁 Created base directory on Drive: {drive_base_path}")
+        except:
+            print("⚠️ Gagal membuat folder di Drive. Pastikan Drive sudah di-mount!")
+
     trainer = SFTTrainer(
         model = model,
         tokenizer = tokenizer,
@@ -81,33 +93,33 @@ def train_on_colab():
         dataset_text_field = "text",
         max_seq_length = max_seq_length,
         dataset_num_proc = 2,
-        packing = True, # Mempercepat training untuk data SNI yang bervariasi panjangnya
+        packing = True, 
         args = TrainingArguments(
-            per_device_train_batch_size = 4, # L4 bisa handle batch size lebih besar
+            per_device_train_batch_size = 4, 
             gradient_accumulation_steps = 4,
             warmup_steps = 10,
-            max_steps = 120, # Dengan 12k data, 120-200 steps adalah titik mulai yang baik
+            max_steps = 120, 
             learning_rate = 2e-4,
             fp16 = not torch.cuda.is_bf16_supported(),
-            bf16 = torch.cuda.is_bf16_supported(), # L4 mendukung bfloat16 (lebih stabil)
+            bf16 = torch.cuda.is_bf16_supported(), 
             logging_steps = 1,
             optim = "adamw_8bit",
             weight_decay = 0.01,
             lr_scheduler_type = "cosine",
             seed = 3407,
-            output_dir = "outputs_structural_ai",
+            output_dir = output_dir, # Langsung ke Drive
+            save_total_limit = 2,    # Simpan 2 checkpoint terakhir saja di Drive
+            save_steps = 30,          # Simpan checkpoint setiap 30 step
         ),
     )
 
     # 6. Jalankan Training
-    print("🚀 Memulai Training di L4 GPU...")
+    print(f"🚀 Memulai Training di L4 GPU... (Syncing to Drive: {output_dir})")
     trainer.train()
 
-    # 7. Simpan Model Akhir
-    # Simpan dalam format GGUF jika ingin digunakan langsung di Local Mac/Ollama dilepas
-    # Atau simpan Merged 16bit untuk akurasi terbaik
-    model.save_pretrained_merged("gemma2-9b-structural-18april", tokenizer, save_method = "merged_16bit",)
-    print("✨ Selesai! Model disimpan di folder: gemma2-9b-structural-18april")
+    # 7. Simpan Model Akhir Langsung ke Drive
+    model.save_pretrained_merged(final_model_path, tokenizer, save_method = "merged_16bit",)
+    print(f"✨ Selesai! Model permanen tersimpan di Drive: {final_model_path}")
 
 if __name__ == "__main__":
     import os

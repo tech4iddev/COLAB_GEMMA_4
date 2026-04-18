@@ -37,35 +37,25 @@ Setelah dijalankan, file final akan berada di `datasets/dataset_final_18_april.j
 
 ---
 
-## 3. Proses Training (Gemma 2 9B)
-Jalankan script training yang sudah dioptimasi untuk L4 GPU.
+## 3. Proses Training (Sinkronisasi Real-time ke Drive)
+Jalankan script training. Perhatikan bahwa script ini secara otomatis akan menyimpan checkpoint setiap 30 step langsung ke Google Drive Anda untuk mencegah kehilangan data jika koneksi terputus.
 
 ```python
-# Memulai proses training
+# Memulai proses training (Simpan otomatis ke MyDrive/Structural_AI_Project)
 !python train_colab_L4.py
 ```
 
 ---
 
-## 4. Menyimpan Hasil ke Google Drive
-Setelah training selesai, folder model akan tersimpan di Colab. Jalankan kode ini untuk memindahkannya ke Google Drive agar permanen.
+## 4. Lokasi Hasil Training
+Setelah selesai, hasil model dan log training dapat Anda temukan di Google Drive pada folder:
+`My Drive / Structural_AI_Project / gemma2-9b-structural-18april`
 
-```python
-import shutil
-import os
+---
+## Tips Penting:
+*   **WAJIB MOUNT DRIVE**: Jika Drive tidak di-mount, training tidak akan dimulai karena script tidak bisa menemukan lokasi penyimpanan permanen.
+*   **Waktu Training**: Estimasi 20-30 menit untuk 120 steps pada GPU L4.
 
-# Tentukan nama folder hasil training
-source_folder = "/content/structural_ai/model_18_april/gemma2-9b-structural-18april"
-destination_drive = "/content/drive/MyDrive/Structural_AI_Models/gemma2-9b-18april"
-
-# Buat folder di Drive jika belum ada
-if not os.path.exists("/content/drive/MyDrive/Structural_AI_Models"):
-    os.makedirs("/content/drive/MyDrive/Structural_AI_Models")
-
-# Pindahkan
-shutil.move(source_folder, destination_drive)
-print(f"✅ Model berhasil diamankan ke Drive: {destination_drive}")
-```
 
 ---
 
