@@ -3,7 +3,7 @@ Script Training Gemma 2 9B - Optimized for Google Colab L4 GPU
 Lokasi: model_18_april/train_colab_L4.py
 """
 import os
-print("\n[DEBUG] File: train_colab_L4.py | Update: 2026-04-18 23:50 (OOM Safe Mode)")
+print("\n[DEBUG] File: train_colab_L4.py | Update: 2026-04-19 00:00 (Resume Support)")
 
 try:
     from unsloth import FastLanguageModel
@@ -112,9 +112,18 @@ def train_on_colab():
         ),
     )
 
-    # 7. Jalankan Training
+    # 7. Jalankan Training (Dengan Fitur Auto-Resume)
     print(f"🔥 Memulai Training (Syncing to: {output_dir})...")
-    trainer.train()
+    
+    # Cek apakah ada checkpoint untuk di-resume
+    resume_checkpoint = None
+    if os.path.exists(output_dir):
+        checkpoints = [os.path.join(output_dir, d) for d in os.listdir(output_dir) if "checkpoint-" in d]
+        if checkpoints:
+            resume_checkpoint = True # Akan mengambil yang terbaru secara otomatis dari output_dir
+            print(f"🔄 Checkpoint ditemukan! Melanjutkan training dari: {output_dir}")
+
+    trainer.train(resume_from_checkpoint = resume_checkpoint)
 
     # 8. Simpan Model Akhir Merged
     print(f"📦 Menyimpan model merged ke Drive: {final_model_path}")
