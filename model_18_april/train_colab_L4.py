@@ -3,7 +3,7 @@ Script Training Gemma 2 9B - Optimized for Google Colab L4 GPU
 Lokasi: model_18_april/train_colab_L4.py
 """
 import os
-print("\n[DEBUG] File: train_colab_L4.py | Update: 2026-04-19 00:21 (Smart Stopping)")
+print("\n[DEBUG] File: train_colab_L4.py | Update: 2026-04-19 00:23 (Target 0.8)")
 
 try:
     from unsloth import FastLanguageModel
@@ -30,8 +30,8 @@ class SmartStoppingCallback(TrainerCallback):
             current_loss = logs.get("loss")
             current_epoch = state.epoch
             
-            # KRITERIA STOP: Sudah 1 Epoch DAN Loss di bawah 1.0
-            if current_epoch >= 1.0 and current_loss is not None and current_loss < 1.0:
+            # KRITERIA STOP: Sudah 1 Epoch DAN Loss di bawah 0.8
+            if current_epoch >= 1.0 and current_loss is not None and current_loss < 0.8:
                 print(f"\n🎯 SMART STOP: Target tercapai! (Epoch: {current_epoch:.2f}, Loss: {current_loss:.4f})")
                 print("Lanjut ke proses Final Saving & GGUF...")
                 control.should_training_stop = True
