@@ -3,7 +3,7 @@ Script Training Gemma 2 9B - Optimized for Google Colab L4 GPU
 Lokasi: model_18_april/train_colab_L4.py
 """
 import os
-print("\n[DEBUG] File: train_colab_L4.py | Update: 2026-04-18 23:35")
+print("\n[DEBUG] File: train_colab_L4.py | Update: 2026-04-18 23:37 (OOM Fix)")
 
 try:
     from unsloth import FastLanguageModel
@@ -97,8 +97,8 @@ def train_on_colab():
         dataset_num_proc = 2,
         packing = True, 
         args = TrainingArguments(
-            per_device_train_batch_size = 4, 
-            gradient_accumulation_steps = 4,
+            per_device_train_batch_size = 2, # Diturunkan dari 4 ke 2 untuk menghemat VRAM
+            gradient_accumulation_steps = 8, # Dinaikkan dari 4 ke 8 (Total global batch tetap 16)
             warmup_steps = 10,
             max_steps = 120, 
             learning_rate = 2e-4,
@@ -148,4 +148,7 @@ def train_on_colab():
 
 if __name__ == "__main__":
     import os
+    # Optimasi untuk mencegah fragmentasi memori (Mengatasi CUDA OOM)
+    os.environ["PYTORCH_ALLOC_CONF"] = "expandable_segments:True"
+    
     train_on_colab()
