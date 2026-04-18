@@ -3,13 +3,13 @@ Script Training Gemma 2 9B - Optimized for Google Colab L4 GPU
 Lokasi: model_18_april/train_colab_L4.py
 """
 import os
-print("\n[DEBUG] File: train_colab_L4.py | Update: 2026-04-19 00:10 (2 Epoch Target)")
+print("\n[DEBUG] File: train_colab_L4.py | Update: 2026-04-19 00:21 (Smart Stopping)")
 
 try:
     from unsloth import FastLanguageModel
     import torch
     from trl import SFTTrainer
-    from transformers import TrainingArguments
+    from transformers import TrainingArguments, TrainerCallback
     from datasets import load_dataset
 except ImportError:
     print("📦 Menginstall dependencies (Unsloth)...")
@@ -20,8 +20,21 @@ except ImportError:
     from unsloth import FastLanguageModel
     import torch
     from trl import SFTTrainer
-    from transformers import TrainingArguments
+    from transformers import TrainingArguments, TrainerCallback
     from datasets import load_dataset
+
+# 0. Custom Callback untuk Dynamic Stopping
+class SmartStoppingCallback(TrainerCallback):
+    def on_log(self, args, state, control, logs=None, **kwargs):
+        if logs is not None:
+            current_loss = logs.get("loss")
+            current_epoch = state.epoch
+            
+            # KRITERIA STOP: Sudah 1 Epoch DAN Loss di bawah 1.0
+            if current_epoch >= 1.0 and current_loss is not None and current_loss < 1.0:
+                print(f"\n🎯 SMART STOP: Target tercapai! (Epoch: {current_epoch:.2f}, Loss: {current_loss:.4f})")
+                print("Lanjut ke proses Final Saving & GGUF...")
+                control.should_training_stop = True
 
 def train_on_colab():
     # 1. Konfigurasi Dasar
@@ -93,6 +106,7 @@ def train_on_colab():
         max_seq_length = max_seq_length,
         dataset_num_proc = 2,
         packing = True, 
+        callbacks = [SmartStoppingCallback()], # Aktifkan Smart Stop
         args = TrainingArguments(
             per_device_train_batch_size = 1,  # Safe batch size
             gradient_accumulation_steps = 16, # Global Batch = 16
