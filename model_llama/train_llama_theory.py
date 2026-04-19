@@ -1,6 +1,6 @@
 # --- LOG UPDATE ---
-# Tanggal: 2026-04-19 12:45
-# Update: Script pertama untuk Llama 3.2 3B, dukungan auto-save ke Google Drive, dan Chat Template Llama-3.
+# Tanggal: 2026-04-19 13:10
+# Update: Menggunakan dataset 'super_clean' (tanpa OCR noise/HTML), LR 1e-5, dan optimasi stabilitas.
 # ------------------
 import os
 import torch
@@ -13,7 +13,8 @@ from unsloth import is_bfloat16_supported
 # --- KONFIGURASI ---
 MODEL_NAME = "unsloth/Llama-3.2-3B-Instruct-bnb-4bit"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-DATASET_PATH = os.path.join(SCRIPT_DIR, "datasets/clean_theory_dataset.jsonl")
+# Menggunakan DATASET SUPER CLEAN
+DATASET_PATH = os.path.join(SCRIPT_DIR, "datasets/super_clean_theory.jsonl")
 
 # Path Output ke Google Drive
 DRIVE_OUTPUT_DIR = "/content/drive/MyDrive/Structural_AI_Project/model_llama"
@@ -74,7 +75,7 @@ trainer = SFTTrainer(
         gradient_accumulation_steps=4,
         warmup_steps=30,
         max_steps=400,
-        learning_rate=2e-5,
+        learning_rate=1e-5, # Lebih lambat (1e-5) agar model lebih stabil menyerah gaya bahasa bersih
         fp16=not is_bfloat16_supported(),
         bf16=is_bfloat16_supported(),
         logging_steps=10,
