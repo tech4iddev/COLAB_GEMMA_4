@@ -7,12 +7,14 @@ from transformers import TrainingArguments
 from unsloth import is_bfloat16_supported
 
 # --- KONFIGURASI ---
-# Gunakan Llama 3.2 3B (Pastikan sudah Accept License di HF)
-MODEL_NAME = "unsloth/Llama-3.2-3B-Instruct-bnb-4bit" 
-# Mencari dataset relatif terhadap lokasi script ini
+MODEL_NAME = "unsloth/Llama-3.2-3B-Instruct-bnb-4bit"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DATASET_PATH = os.path.join(SCRIPT_DIR, "datasets/clean_theory_dataset.jsonl")
-OUTPUT_DIR = "/content/llama3.2-3b-structural-theory"
+
+# Path Output ke Google Drive
+DRIVE_OUTPUT_DIR = "/content/drive/MyDrive/Structural_AI_Project/model_llama"
+# Fallback jika Drive tidak mounted (untuk testing)
+OUTPUT_DIR = DRIVE_OUTPUT_DIR if os.path.exists("/content/drive") else "./model_llama_local"
 
 print(f"🚀 Memuat Model {MODEL_NAME} untuk Training Teori...")
 
@@ -86,6 +88,9 @@ trainer.train()
 
 # --- SIMPAN MODEL ---
 print("💾 Menyimpan Model Hasil Training Llama...")
+if not os.path.exists(OUTPUT_DIR):
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+
 model.save_pretrained_merged(OUTPUT_DIR, tokenizer, save_method="merged_16bit")
 
 print(f"✅ Selesai! Model Llama tersimpan di {OUTPUT_DIR}")
