@@ -7,8 +7,10 @@ from transformers import TrainingArguments
 from unsloth import is_bfloat16_supported
 
 # --- KONFIGURASI ---
-MODEL_NAME = "unsloth/gemma-2-9b-it-bnb-4bit" # Base model yang bersih
-DATASET_PATH = "/content/clean_theory_dataset.jsonl" # Path di Colab nanti
+MODEL_NAME = "unsloth/gemma-2-9b-it-bnb-4bit"
+# Mencari dataset relatif terhadap lokasi script ini
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+DATASET_PATH = os.path.join(SCRIPT_DIR, "datasets/clean_theory_dataset.jsonl")
 OUTPUT_DIR = "/content/gemma2-9b-structural-theory-only"
 
 print("🚀 Memuat Model Gemma 2 9B untuk Training Teori...")
