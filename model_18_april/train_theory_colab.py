@@ -79,6 +79,7 @@ trainer = SFTTrainer(
         lr_scheduler_type="linear",
         seed=3407,
         output_dir="outputs",
+        report_to="none", # Matikan W&B agar tidak minta input login
     ),
 )
 
