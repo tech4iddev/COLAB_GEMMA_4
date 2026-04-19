@@ -3,7 +3,7 @@ Script Training Gemma 2 9B - Optimized for Google Colab L4 GPU
 Lokasi: model_18_april/train_colab_L4.py
 """
 import os
-print("\n[DEBUG] File: train_colab_L4.py | Update: 2026-04-19 09:03 (Forced Token Patch)")
+print("\n[DEBUG] File: train_colab_L4.py | Update: 2026-04-19 09:27 (Inference Synchronized)")
 
 try:
     from unsloth import FastLanguageModel
@@ -37,13 +37,12 @@ class SmartStoppingCallback(TrainerCallback):
                 control.should_training_stop = True
 
 def run_post_train_test(model_path):
-    """Fungsi untuk mengetes model secara instan setelah merging"""
+    """Fungsi untuk mengetes model secara instan setelah merging (Versi Sinkron 2026)"""
     try:
         from unsloth import FastLanguageModel
         import torch
         print(f"\n🧪 [AUTO-TEST] Menjalankan tes instan pada: {model_path}")
         
-        # Load ulang model yang sudah di-merge (4bit untuk speed)
         model, tokenizer = FastLanguageModel.from_pretrained(
             model_name = model_path,
             max_seq_length = 2048,
@@ -53,10 +52,18 @@ def run_post_train_test(model_path):
 
         question = "Hitung kapasitas tarik profil baja jika fy=250 MPa dan A=3000 mm2."
         messages = [{"role": "user", "content": question}]
-        inputs = tokenizer.apply_chat_template(messages, tokenize=True, add_generation_prompt=True, return_tensors="pt").to("cuda")
+        
+        # LOGIKA 2-TAHAP (Anti EOS Melompong)
+        text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+        inputs = tokenizer(text, return_tensors="pt").to("cuda")
 
         print("🤖 Model sedang berpikir...")
-        outputs = model.generate(input_ids = inputs, max_new_tokens = 512, temperature = 0.1)
+        outputs = model.generate(
+            **inputs, 
+            max_new_tokens = 512, 
+            temperature = 0.1,
+            pad_token_id = tokenizer.eos_token_id
+        )
         response = tokenizer.batch_decode(outputs)[0]
         
         answer = response.split("<start_of_turn>model\n")[-1].replace("<end_of_turn>", "").strip()
@@ -66,7 +73,6 @@ def run_post_train_test(model_path):
         print(answer)
         print("="*50 + "\n")
         
-        # Bersihkan memori agar GGUF bisa jalan
         del model
         torch.cuda.empty_cache()
     except Exception as e:
