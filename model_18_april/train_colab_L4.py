@@ -3,7 +3,7 @@ Script Training Gemma 2 9B - Optimized for Google Colab L4 GPU
 Lokasi: model_18_april/train_colab_L4.py
 """
 import os
-print("\n[DEBUG] File: train_colab_L4.py | Update: 2026-04-19 09:02 (Token Patch)")
+print("\n[DEBUG] File: train_colab_L4.py | Update: 2026-04-19 09:03 (Forced Token Patch)")
 
 try:
     from unsloth import FastLanguageModel
@@ -133,6 +133,29 @@ def train_on_colab():
     if not os.path.exists(drive_base_path):
         os.makedirs(drive_base_path, exist_ok=True)
 
+    training_args = TrainingArguments(
+        per_device_train_batch_size = 1,
+        gradient_accumulation_steps = 16,
+        warmup_steps = 50,
+        max_steps = 600,
+        learning_rate = 5e-5,
+        fp16 = not torch.cuda.is_bf16_supported(),
+        bf16 = torch.cuda.is_bf16_supported(), 
+        logging_steps = 10,
+        optim = "paged_adamw_8bit",
+        weight_decay = 0.01,
+        lr_scheduler_type = "linear",
+        seed = 3407,
+        output_dir = output_dir, 
+        save_total_limit = 2,
+        save_steps = 100,
+        report_to = "none",
+    )
+
+    # HOTFIX: Paksa variabel agar ada (Kompatibilitas Transformers v4.46+)
+    if not hasattr(training_args, "push_to_hub_token"):
+        setattr(training_args, "push_to_hub_token", None)
+
     print("🚀 Menyiapkan Trainer (Safe Mode)...")
     trainer = SFTTrainer(
         model = model,
@@ -142,28 +165,8 @@ def train_on_colab():
         max_seq_length = max_seq_length,
         dataset_num_proc = 2,
         packing = True, 
-        callbacks = [SmartStoppingCallback()], # Aktifkan Smart Stop
-        args = TrainingArguments(
-            per_device_train_batch_size = 1,  # Safe batch size
-            gradient_accumulation_steps = 16, # Global Batch = 16
-            warmup_steps = 50,
-            max_steps = 600,  # Target baru untuk mencegah overfitting/collapse
-            learning_rate = 5e-5, # Learning rate lebih stabil
-            fp16 = not torch.cuda.is_bf16_supported(),
-            bf16 = torch.cuda.is_bf16_supported(), 
-            logging_steps = 10,
-            optim = "paged_adamw_8bit",
-            weight_decay = 0.01,
-            lr_scheduler_type = "linear", # Linear sering lebih stabil daripada cosine untuk short runs
-            seed = 3407,
-            output_dir = output_dir, 
-            save_total_limit = 2,
-            save_steps = 100, # Simpan setiap 100 step agar kita punya banyak pilihan cadangan
-            report_to = "none",
-            # HOTFIX: Tambahkan ini untuk mencegah AttributeError 'push_to_hub_token'
-            push_to_hub = False,
-            hub_token = None,
-        ),
+        callbacks = [SmartStoppingCallback()],
+        args = training_args,
     )
 
     # 7. Jalankan Training (Dengan Fitur Auto-Resume)
