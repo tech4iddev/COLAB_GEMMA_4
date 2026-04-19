@@ -13,8 +13,8 @@ from unsloth import is_bfloat16_supported
 # --- KONFIGURASI ---
 MODEL_NAME = "unsloth/Llama-3.2-3B-Instruct-bnb-4bit"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-# Menggunakan DATASET SUPER CLEAN
-DATASET_PATH = os.path.join(SCRIPT_DIR, "datasets/super_clean_theory.jsonl")
+# Menggunakan DATASET HYBRID (EXPERT + CLEAN THEORY)
+DATASET_PATH = os.path.join(SCRIPT_DIR, "datasets/final_expert_hybrid.jsonl")
 
 # Path Output ke Google Drive
 DRIVE_OUTPUT_DIR = "/content/drive/MyDrive/Structural_AI_Project/model_llama"
