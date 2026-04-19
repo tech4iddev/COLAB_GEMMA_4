@@ -1,6 +1,6 @@
 # --- LOG UPDATE ---
-# Tanggal: 2026-04-19 13:10
-# Update: Menggunakan dataset 'super_clean' (tanpa OCR noise/HTML), LR 1e-5, dan optimasi stabilitas.
+# Tanggal: 2026-04-19 13:17
+# Update: Integrasi Blok Testing Otomatis setelah training selesai (G-Drive Sync + Auto Test).
 # ------------------
 import os
 import torch
@@ -99,3 +99,43 @@ if not os.path.exists(OUTPUT_DIR):
 model.save_pretrained_merged(OUTPUT_DIR, tokenizer, save_method="merged_16bit")
 
 print(f"✅ Selesai! Model Llama tersimpan di {OUTPUT_DIR}")
+
+# --- BLOK TESTING OTOMATIS (SETELAH TRAINING) ---
+print("\n" + "="*50)
+print("🧪 MEMULAI TESTING OTOMATIS HASIL TRAINING...")
+print("="*50)
+
+FastLanguageModel.for_inference(model) # Set ke mode inferensi
+
+def run_test(prompt):
+    system_prompt = "Anda adalah Structural AI Engineer Expert. Jawablah dengan runtut, detail, dan sertakan referensi SNI."
+    text = f"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n{system_prompt}<|eot_id|>"
+    text += f"<|start_header_id|>user<|end_header_id|>\n\n{prompt}<|eot_id|>"
+    text += f"<|start_header_id|>assistant<|end_header_id|>\n\n"
+    
+    inputs = tokenizer([text], return_tensors="pt").to("cuda")
+    outputs = model.generate(
+        **inputs, 
+        max_new_tokens=512, 
+        repetition_penalty=1.2, 
+        temperature=0.3,
+        do_sample=True,
+        use_cache=True
+    )
+    result = tokenizer.batch_decode(outputs)[0]
+    final_output = result.split("<|start_header_id|>assistant<|end_header_id|>\n\n")[-1].replace("<|eot_id|>", "").strip()
+    return final_output
+
+test_questions = [
+    "Jelaskan apa itu beban gempa nominal sesuai SNI 1726:2019?",
+    "Bagaimana prosedur menentukan kategori risiko struktur gedung?",
+    "Sebutkan kombinasi pembebanan untuk metode LRFD."
+]
+
+for i, q in enumerate(test_questions):
+    print(f"\n[HASIL TEST {i+1}]: {q}")
+    print("-" * 30)
+    print(run_test(q))
+    print("\n" + "="*50)
+
+print("\n🚀 Proses Training & Testing Selesai!")
