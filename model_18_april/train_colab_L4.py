@@ -192,32 +192,27 @@ def train_on_colab():
 
     trainer.train(resume_from_checkpoint = resume_checkpoint)
 
-    # 8. Simpan Merged 16bit Model
-    print(f"🚀 Menyimpan Merged 16bit Model ke: {final_model_path}")
-    model.save_pretrained_merged(final_model_path, tokenizer, save_method = "merged_16bit")
+    # 8. Simpan Merged 16bit Model (Local First for Speed & Safety)
+    local_final_path = "/content/gemma2-9b-structural-final"
+    print(f"🚀 Menyimpan Merged 16bit Model secara LOKAL ke: {local_final_path}")
+    model.save_pretrained_merged(local_final_path, tokenizer, save_method = "merged_16bit")
     
-    # --- STEP BARU: AUTO-TEST ---
-    run_post_train_test(final_model_path)
+    # --- STEP: AUTO-TEST (Lari dari local supaya cepat) ---
+    run_post_train_test(local_final_path)
     
-    # 9. Konversi Otomatis ke GGUF Q4_K_M (Untuk Mac M4)
-    print("\n🛠️ Memulai Konversi GGUF (Q4_K_M)...")
-    gguf_drive_path = os.path.join(drive_base_path, "GGUF_MODELS")
-    if not os.path.exists(gguf_drive_path):
-        os.makedirs(gguf_drive_path, exist_ok=True)
-
-    model.save_pretrained_gguf(
-        "structural_ai_model", 
-        tokenizer, 
-        quantization_method = "q4_k_m"
-    )
-
-    # Pindahkan GGUF ke Drive
+    # 9. Sync ke Google Drive (Safe Transfer)
+    print(f"📦 Menyinkronkan model ke Google Drive: {final_model_path}...")
     import shutil
-    for file in os.listdir("."):
-        if file.endswith(".gguf"):
-            shutil.move(file, os.path.join(gguf_drive_path, "gemma2-9b-structural-18april-Q4_K_M.gguf"))
-            print(f"✅ SEMUA SELESAI! GGUF siap di: {gguf_drive_path}")
-            break
+    
+    if os.path.exists(final_model_path):
+        print("⚠️ Folder lama di Drive ditemukan, menghapus untuk mencegah konflik...")
+        shutil.rmtree(final_model_path)
+    
+    # Copying from local to drive
+    shutil.copytree(local_final_path, final_model_path)
+    print(f"✅ SINKRONISASI SELESAI! Model aman di Drive: {final_model_path}")
+    
+    print("\n💡 NOTE: Silakan jalankan 'model_18_april/export_to_gguf.py' jika ingin konversi ke GGUF.")
 
 if __name__ == "__main__":
     # Cegah fragmentasi memori
