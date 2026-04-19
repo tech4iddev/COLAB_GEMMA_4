@@ -32,7 +32,11 @@ model = FastLanguageModel.get_peft_model(
 )
 
 # --- PREPARASI DATASET ---
+# Kita tambahkan instruksi gaya bahasa langsung ke dalam prompt training
+style_instruction = "Jawablah dengan runtut, detail, dan sebutkan referensi pasal SNI yang relevan jika tersedia."
+
 prompt_style = """<start_of_turn>user
+""" + style_instruction + """
 {}
 {} <end_of_turn>
 <start_of_turn>model
