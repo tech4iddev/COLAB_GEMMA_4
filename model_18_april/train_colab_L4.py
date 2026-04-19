@@ -3,7 +3,7 @@ Script Training Gemma 2 9B - Optimized for Google Colab L4 GPU
 Lokasi: model_18_april/train_colab_L4.py
 """
 import os
-print("\n[DEBUG] File: train_colab_L4.py | Update: 2026-04-19 07:58 (Final 20 Steps)")
+print("\n[DEBUG] File: train_colab_L4.py | Update: 2026-04-19 08:56 (Stable Mode)")
 
 try:
     from unsloth import FastLanguageModel
@@ -110,19 +110,20 @@ def train_on_colab():
         args = TrainingArguments(
             per_device_train_batch_size = 1,  # Safe batch size
             gradient_accumulation_steps = 16, # Global Batch = 16
-            warmup_steps = 10,
-            max_steps = 1520, # 1500 + 20 Step tambahan untuk memicu proses finish
-            learning_rate = 2e-4,
+            warmup_steps = 50,
+            max_steps = 600,  # Target baru untuk mencegah overfitting/collapse
+            learning_rate = 5e-5, # Learning rate lebih stabil
             fp16 = not torch.cuda.is_bf16_supported(),
             bf16 = torch.cuda.is_bf16_supported(), 
-            logging_steps = 1,
-            optim = "paged_adamw_8bit",      # Memory efficient optimizer
+            logging_steps = 10,
+            optim = "paged_adamw_8bit",
             weight_decay = 0.01,
-            lr_scheduler_type = "cosine",
+            lr_scheduler_type = "linear", # Linear sering lebih stabil daripada cosine untuk short runs
             seed = 3407,
             output_dir = output_dir, 
             save_total_limit = 2,
-            save_steps = 50, # Simpan setiap 50 step
+            save_steps = 100, # Simpan setiap 100 step agar kita punya banyak pilihan cadangan
+            report_to = "none",
         ),
     )
 
