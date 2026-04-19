@@ -3,7 +3,7 @@ Script Training Gemma 2 9B - Optimized for Google Colab L4 GPU
 Lokasi: model_18_april/train_colab_L4.py
 """
 import os
-print("\n[DEBUG] File: train_colab_L4.py | Update: 2026-04-19 09:28 (Dry Run 10 Steps)")
+print("\n🚀 [PRODUCTION] File: train_colab_L4.py | Update: 2026-04-19 09:52 (Full Training 600 Steps)")
 
 try:
     from unsloth import FastLanguageModel
@@ -111,7 +111,7 @@ def train_on_colab():
 <start_of_turn>model
 {}<end_of_turn>"""
 
-    print("\n[DEBUG] File: train_colab_L4.py | Update: 2026-04-19 09:44 (Indo-Focus Mode)")
+    print("\n🔥 [RUN] Memulai Training Sungguhan (Indo-Focus Mode)")
 
     def formatting_prompts_func(examples):
         instructions = examples["instruction"]
