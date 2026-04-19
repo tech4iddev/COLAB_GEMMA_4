@@ -31,10 +31,19 @@ else:
 %cd /content/structural_ai/model_18_april
 ```
 
-# 3. Install Dependencies
-!pip install "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
-!pip install unsloth_zoo
-!pip install --no-deps xformers trl peft accelerate bitsandbytes
+# 3. Install Dependencies (PENTING: Versi Terkunci)
+Jalankan ini secara spesifik untuk menghindari bug "Bisu" pada Gemma 2.
+
+```python
+# 1. Uninstall versi default yang mungkin bermasalah
+!pip uninstall -y unsloth transformers trl peft accelerate xformers bitsandbytes
+
+# 2. Install Versi Stabil (Golden Version 2026)
+!pip install --no-deps "xformers<0.0.35" "trl<0.13.0" peft accelerate bitsandbytes
+!pip install --upgrade "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
+!pip install --upgrade "transformers==4.51.3" # <--- JANGAN DIGANTI
+```
+**WAJIB**: Setelah instalasi selesai, klik menu **Runtime ➡️ Restart Session**.
 ```
 
 ---
@@ -70,9 +79,20 @@ Setelah script selesai (All Done), Anda dapat mengambil hasilnya di:
 *   **Raw Model (16-bit)**: `My Drive / Structural_AI_Project / gemma2-9b-structural-18april`
 
 ---
-## Tips Penting:
-*   **WAJIB MOUNT DRIVE**: Jika Drive tidak di-mount, training tidak akan dimulai karena script tidak bisa menemukan lokasi penyimpanan permanen.
-*   **Waktu Training**: Estimasi 20-30 menit untuk 120 steps pada GPU L4.
+## 5. Tips Anti-Gagal (Golden Rules)
+1.  **Stop "Bisu" (`<eos>`)**: Gunakan **Logika Testing 2-Tahap** (Teks ➡️ Tokenizer) agar `attention_mask` terkirim. Kode aman:
+    ```python
+    text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+    inputs = tokenizer(text, return_tensors="pt").to("cuda")
+    outputs = model.generate(**inputs, max_new_tokens=512, pad_token_id=tokenizer.eos_token_id)
+    ```
+2.  **Stop "Ngawur" (`myself`)**: Jika model mulai mengulang kata aneh, berarti **Overfitting**. Gunakan Learning Rate rendah (**5e-5**) dan batasi di **Step 600**.
+3.  **Bursa Transfer Versi**: Jika Python 3.12 Colab update, pastikan tetap mengunci `transformers==4.51.3`.
+4.  **Hardware**: Prioritaskan **L4 GPU**. T4 GPU adalah alternatif paling stabil.
+
+---
+*Dibuat untuk Milestone Model 18 April - Structural Engineering AI (Sync: 09:30)*
+
 
 
 ---
