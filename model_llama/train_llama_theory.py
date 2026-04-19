@@ -1,3 +1,7 @@
+# --- LOG UPDATE ---
+# Tanggal: 2026-04-19 12:45
+# Update: Script pertama untuk Llama 3.2 3B, dukungan auto-save ke Google Drive, dan Chat Template Llama-3.
+# ------------------
 import os
 import torch
 from unsloth import FastLanguageModel

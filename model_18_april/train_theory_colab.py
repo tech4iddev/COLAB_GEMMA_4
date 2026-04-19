@@ -1,3 +1,7 @@
+# --- LOG UPDATE ---
+# Tanggal: 2026-04-19 12:45
+# Update: Menggunakan dataset teori bersih (3.8k data), penyesuaian LR 2e-5, dan sinkronisasi path Colab.
+# ------------------
 import os
 import torch
 from unsloth import FastLanguageModel

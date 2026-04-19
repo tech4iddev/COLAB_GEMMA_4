@@ -1,3 +1,7 @@
+# --- LOG UPDATE ---
+# Tanggal: 2026-04-19 12:45
+# Update: Implementasi Mirostat V2, perbaikan UI Multi-line, dan penguatan System Prompt untuk jawaban mendetail & SNI.
+# ------------------
 import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware

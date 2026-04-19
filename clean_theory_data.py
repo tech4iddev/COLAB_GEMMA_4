@@ -1,3 +1,7 @@
+# --- LOG UPDATE ---
+# Tanggal: 2026-04-19 12:45
+# Update: Script pembersih dataset untuk membuang tabel rusak dan noise OCR (Berhasil membuang 3k data kotor).
+# ------------------
 import json
 import re
 
