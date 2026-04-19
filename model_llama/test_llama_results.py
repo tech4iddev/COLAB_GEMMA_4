@@ -27,7 +27,14 @@ def test_model(prompt):
     text += f"<|start_header_id|>assistant<|end_header_id|>\n\n"
     
     inputs = tokenizer([text], return_tensors="pt").to("cuda")
-    outputs = model.generate(**inputs, max_new_tokens=1024, use_cache=True)
+    outputs = model.generate(
+        **inputs, 
+        max_new_tokens=1024, 
+        repetition_penalty=1.2, # Tambahkan penalti pengulangan
+        temperature=0.3,        # Sedikit kreativitas agar tidak stuck
+        do_sample=True,
+        use_cache=True
+    )
     result = tokenizer.batch_decode(outputs)[0]
     
     # Ambil hanya bagian jawaban assistant

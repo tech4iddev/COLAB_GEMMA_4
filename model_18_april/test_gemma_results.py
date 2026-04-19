@@ -25,7 +25,14 @@ def test_model(prompt):
     text = f"<start_of_turn>user\n{style_instruction}\n{prompt}<end_of_turn>\n<start_of_turn>model\n"
     
     inputs = tokenizer([text], return_tensors="pt").to("cuda")
-    outputs = model.generate(**inputs, max_new_tokens=1024, use_cache=True)
+    outputs = model.generate(
+        **inputs, 
+        max_new_tokens=1024, 
+        repetition_penalty=1.2, # Penalti agar tidak looping
+        temperature=0.3, 
+        do_sample=True,
+        use_cache=True
+    )
     result = tokenizer.batch_decode(outputs)[0]
     
     # Ambil hanya bagian jawaban model
