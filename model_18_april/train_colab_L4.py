@@ -3,7 +3,7 @@ Script Training Gemma 2 9B - Optimized for Google Colab L4 GPU
 Lokasi: model_18_april/train_colab_L4.py
 """
 import os
-print("\n[DEBUG] File: train_colab_L4.py | Update: 2026-04-19 00:23 (Target 0.8)")
+print("\n[DEBUG] File: train_colab_L4.py | Update: 2026-04-19 07:55 (Quick Test)")
 
 try:
     from unsloth import FastLanguageModel
@@ -111,7 +111,7 @@ def train_on_colab():
             per_device_train_batch_size = 1,  # Safe batch size
             gradient_accumulation_steps = 16, # Global Batch = 16
             warmup_steps = 10,
-            max_steps = 1500, # Dinaikkan untuk mencapai +- 2 Epoch (11800/16 * 2)
+            max_steps = 10, # JALUR CEPAT: Hanya 10 step untuk mengetes proses saving/gguf
             learning_rate = 2e-4,
             fp16 = not torch.cuda.is_bf16_supported(),
             bf16 = torch.cuda.is_bf16_supported(), 
