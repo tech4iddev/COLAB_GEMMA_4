@@ -3,7 +3,7 @@ Script Training Gemma 2 9B - Optimized for Google Colab L4 GPU
 Lokasi: model_18_april/train_colab_L4.py
 """
 import os
-print("\n[DEBUG] File: train_colab_L4.py | Update: 2026-04-19 08:56 (Stable Mode)")
+print("\n[DEBUG] File: train_colab_L4.py | Update: 2026-04-19 09:00 (Auto-Test Fixed)")
 
 try:
     from unsloth import FastLanguageModel
@@ -35,6 +35,42 @@ class SmartStoppingCallback(TrainerCallback):
                 print(f"\n🎯 SMART STOP: Target tercapai! (Epoch: {current_epoch:.2f}, Loss: {current_loss:.4f})")
                 print("Lanjut ke proses Final Saving & GGUF...")
                 control.should_training_stop = True
+
+def run_post_train_test(model_path):
+    """Fungsi untuk mengetes model secara instan setelah merging"""
+    try:
+        from unsloth import FastLanguageModel
+        import torch
+        print(f"\n🧪 [AUTO-TEST] Menjalankan tes instan pada: {model_path}")
+        
+        # Load ulang model yang sudah di-merge (4bit untuk speed)
+        model, tokenizer = FastLanguageModel.from_pretrained(
+            model_name = model_path,
+            max_seq_length = 2048,
+            load_in_4bit = True,
+        )
+        FastLanguageModel.for_inference(model)
+
+        question = "Hitung kapasitas tarik profil baja jika fy=250 MPa dan A=3000 mm2."
+        messages = [{"role": "user", "content": question}]
+        inputs = tokenizer.apply_chat_template(messages, tokenize=True, add_generation_prompt=True, return_tensors="pt").to("cuda")
+
+        print("🤖 Model sedang berpikir...")
+        outputs = model.generate(input_ids = inputs, max_new_tokens = 512, temperature = 0.1)
+        response = tokenizer.batch_decode(outputs)[0]
+        
+        answer = response.split("<start_of_turn>model\n")[-1].replace("<end_of_turn>", "").strip()
+        print("\n" + "="*50)
+        print("📢 HASIL TEST INSTAN SETELAH TRAINING:")
+        print("-" * 50)
+        print(answer)
+        print("="*50 + "\n")
+        
+        # Bersihkan memori agar GGUF bisa jalan
+        del model
+        torch.cuda.empty_cache()
+    except Exception as e:
+        print(f"⚠️ Gagal menjalankan auto-test: {e}")
 
 def train_on_colab():
     # 1. Konfigurasi Dasar
@@ -140,10 +176,13 @@ def train_on_colab():
 
     trainer.train(resume_from_checkpoint = resume_checkpoint)
 
-    # 8. Simpan Model Akhir Merged
-    print(f"📦 Menyimpan model merged ke Drive: {final_model_path}")
-    model.save_pretrained_merged(final_model_path, tokenizer, save_method = "merged_16bit",)
-
+    # 8. Simpan Merged 16bit Model
+    print(f"🚀 Menyimpan Merged 16bit Model ke: {final_model_path}")
+    model.save_pretrained_merged(final_model_path, tokenizer, save_method = "merged_16bit")
+    
+    # --- STEP BARU: AUTO-TEST ---
+    run_post_train_test(final_model_path)
+    
     # 9. Konversi Otomatis ke GGUF Q4_K_M (Untuk Mac M4)
     print("\n🛠️ Memulai Konversi GGUF (Q4_K_M)...")
     gguf_drive_path = os.path.join(drive_base_path, "GGUF_MODELS")
