@@ -3,7 +3,7 @@ Script Training Gemma 2 9B - Optimized for Google Colab L4 GPU
 Lokasi: model_18_april/train_colab_L4.py
 """
 import os
-print("\n[DEBUG] File: train_colab_L4.py | Update: 2026-04-19 09:00 (Auto-Test Fixed)")
+print("\n[DEBUG] File: train_colab_L4.py | Update: 2026-04-19 09:02 (Token Patch)")
 
 try:
     from unsloth import FastLanguageModel
@@ -160,6 +160,9 @@ def train_on_colab():
             save_total_limit = 2,
             save_steps = 100, # Simpan setiap 100 step agar kita punya banyak pilihan cadangan
             report_to = "none",
+            # HOTFIX: Tambahkan ini untuk mencegah AttributeError 'push_to_hub_token'
+            push_to_hub = False,
+            hub_token = None,
         ),
     )
 
