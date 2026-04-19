@@ -111,13 +111,17 @@ def train_on_colab():
 <start_of_turn>model
 {}<end_of_turn>"""
 
+    print("\n[DEBUG] File: train_colab_L4.py | Update: 2026-04-19 09:44 (Indo-Focus Mode)")
+
     def formatting_prompts_func(examples):
         instructions = examples["instruction"]
         inputs       = examples["input"]
         outputs      = examples["output"]
         texts = []
         for instruction, input, output in zip(instructions, inputs, outputs):
-            text = prompt_style.format(instruction, input, output)
+            # Anchor Indonesian: Mencegah bahasa Spanyol/Drift
+            instruction_with_anchor = f"[Gunakan Bahasa Indonesia]\n{instruction}"
+            text = prompt_style.format(instruction_with_anchor, input, output)
             texts.append(text)
         return { "text" : texts, }
 
@@ -131,7 +135,7 @@ def train_on_colab():
     dataset = load_dataset("json", data_files=dataset_path, split="train")
     dataset = dataset.map(formatting_prompts_func, batched = True,)
 
-    # 6. Konfigurasi Training (SAFE MODE - Mencegah CUDA OOM)
+    # 6. Konfigurasi Training (FULL MODE - 600 Steps)
     drive_base_path = "/content/drive/MyDrive/Structural_AI_Project"
     output_dir = os.path.join(drive_base_path, "outputs")
     final_model_path = os.path.join(drive_base_path, "gemma2-9b-structural-18april")
@@ -142,19 +146,19 @@ def train_on_colab():
     training_args = TrainingArguments(
         per_device_train_batch_size = 1,
         gradient_accumulation_steps = 16,
-        warmup_steps = 5, # Warmup dikurangi karena step-nya cuma 10
-        max_steps = 10,
+        warmup_steps = 50, # Kembali ke setting stabil
+        max_steps = 600,   # Training SUNGGUHAN
         learning_rate = 5e-5,
         fp16 = not torch.cuda.is_bf16_supported(),
         bf16 = torch.cuda.is_bf16_supported(), 
         logging_steps = 10,
         optim = "paged_adamw_8bit",
-        weight_decay = 0.01,
+        weight_decay = 0.1, # Dinaikkan untuk stabilitas bahasa
         lr_scheduler_type = "linear",
         seed = 3407,
         output_dir = output_dir, 
         save_total_limit = 2,
-        save_steps = 100,
+        save_steps = 200,
         report_to = "none",
     )
 
